@@ -78,6 +78,8 @@ export class App implements OnInit {
       map.getCanvas().style.cursor = '';
       popup.remove();
     });
+
+    //test
   }
 
   protected style!: StyleSpecification;
