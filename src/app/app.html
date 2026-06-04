@@ -1,30 +1,67 @@
-<div class="map-container">
-  <mgl-map
-    [style]="style"
-    [zoom]="[13]"
-    [center]="[17.908950535135272, 47.088969173638375]"
-    (mapLoad)="onMapLoad($event)"
-  >
-    <mgl-raster-source
-      id="base-source"
-      attribution="© OpenStreetMap contributors"
-      [tileSize]="256"
-      [tiles]="['https://tile.openstreetmap.org/{z}/{x}/{y}.png']"
-    />
-    <mgl-layer id="base-layer" type="raster" source="base-source" />
+<!--<div class="map-container">-->
+<!--  <mgl-map-->
+<!--    [style]="style"-->
+<!--    [zoom]="[13]"-->
+<!--    [center]="[17.908950535135272, 47.088969173638375]"-->
+<!--    (mapLoad)="onMapLoad($event)"-->
+<!--  >-->
+<!--    <mgl-raster-source-->
+<!--      id="base-source"-->
+<!--      attribution="© OpenStreetMap contributors"-->
+<!--      [tileSize]="256"-->
+<!--      [tiles]="['https://tile.openstreetmap.org/{z}/{x}/{y}.png']"-->
+<!--    />-->
+<!--    <mgl-layer id="base-layer" type="raster" source="base-source" />-->
 
-    <mgl-geojson-source id="pois-source" [data]="pois" />
-    <mgl-layer
-      id="pois-layer"
-      type="symbol"
-      source="pois-source"
-      [layout]="{
-        'text-field': ['get', 'name'],
-        'text-offset': [0, 1.2],
-        'text-size': 16,
-        'text-anchor': 'top'
-      }"
-      [paint]="{ 'text-color': ['get', 'color'] }"
-    />
-  </mgl-map>
+<!--    <mgl-geojson-source id="pois-source" [data]="pois" />-->
+<!--    <mgl-layer-->
+<!--      id="pois-layer"-->
+<!--      type="symbol"-->
+<!--      source="pois-source"-->
+<!--      [layout]="{-->
+<!--        'text-field': ['get', 'name'],-->
+<!--        'text-offset': [0, 1.2],-->
+<!--        'text-size': 16,-->
+<!--        'text-anchor': 'top'-->
+<!--      }"-->
+<!--      [paint]="{ 'text-color': ['get', 'color'] }"-->
+<!--    />-->
+<!--  </mgl-map>-->
+<!--</div>-->
+
+
+
+@if(isLoggedIn){
+  <div class="app-header">
+    <div class="menu-section">
+      <button matIconButton [matMenuTriggerFor]="menu" aria-label="Menu">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item routerLink="">
+          <mat-icon>home</mat-icon>
+          <span>Map</span>
+        </button>
+        <button mat-menu-item routerLink="/map">
+          <mat-icon>list</mat-icon>
+          <span>Recipe list</span>
+        </button>
+<!--        <button mat-menu-item routerLink="/buildings">-->
+<!--          <mat-icon>list</mat-icon>-->
+<!--          <span>Buildings list</span>-->
+<!--        </button>-->
+      </mat-menu>
+    </div>
+
+    <div class="auth-section">
+      <button matButton="outlined" (click)="onLogout()">Logout</button>
+    </div>
+  </div>
+}
+
+<div class="content">
+  <div class="content-inner">
+    <router-outlet></router-outlet>
+  </div>
 </div>
+

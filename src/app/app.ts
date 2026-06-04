@@ -1,13 +1,18 @@
-import { Component, OnInit } from '@angular/core';
-import { StyleSpecification, Map as MapLibreMap, IControl, Popup } from 'maplibre-gl';
+import {Component, inject, OnInit} from '@angular/core';
+import {StyleSpecification, Map as MapLibreMap, IControl, Popup} from 'maplibre-gl';
 import MapLibreDraw from 'maplibre-gl-draw';
 import { FeatureCollection, Polygon, Feature } from 'geojson';
 import pois from './pois.json';
 import { NgxMapLibreGLModule } from '@maplibre/ngx-maplibre-gl';
 import { centroid } from '@turf/turf';
+import {Router, RouterLink, RouterOutlet} from '@angular/router';
+import {LocalStorageKeys} from './constants/local-storage-keys';
+import {MatIcon} from '@angular/material/icon';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 @Component({
   selector: 'app-root',
-  imports: [NgxMapLibreGLModule],
+  imports: [NgxMapLibreGLModule, MatIcon, MatIconButton, MatMenuTrigger, MatMenu, MatMenuItem, RouterLink, MatButton, RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
@@ -79,10 +84,22 @@ export class App implements OnInit {
       popup.remove();
     });
 
-    //test
   }
 
   protected style!: StyleSpecification;
   protected pois!: FeatureCollection;
   protected draw!: MapLibreDraw;
+
+  //Innentől kezdve a jó kód van, ha kivettem már a egy külön komponensbe a map-et
+
+  readonly router = inject(Router);
+
+  get isLoggedIn() {
+    return localStorage.getItem(LocalStorageKeys.TOKEN) !== null;
+  }
+
+  onLogout() {
+    localStorage.removeItem(LocalStorageKeys.TOKEN);
+    this.router.navigateByUrl('login');
+  }
 }
