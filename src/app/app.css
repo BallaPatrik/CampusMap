@@ -1,12 +1,34 @@
-.map-container {
+.app-header {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  padding: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: #fff;
 }
 
-mgl-map {
-  height: 80%;
-  width: 80%;
+.menu-section {
+  display: flex;
+  align-items: center;
+}
+
+.auth-section {
+  margin-right: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.content {
+  flex: auto;
+  justify-items: center;
+  width: 100%;
+  padding: 0.5rem 0;
+}
+
+.content-inner {
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+  justify-items: center;
 }
