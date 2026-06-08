@@ -1,2 +1,23 @@
-<h1>Please login</h1>
-<button matButton="filled" (click)="onLogin()">Login</button>
+<!--  We need to prevent page reload on form submit so we use (ngSubmit) instead of (submit)-->
+<form
+  class="login-form"
+  id="login-form"
+  (ngSubmit)="onLogin(personModel().name, personModel().password)"
+>
+  <h1>Please login</h1>
+  <mat-form-field appearance="outline" class="flex-item">
+    <mat-label>Name</mat-label>
+    <!-- We bind form fields to template code using the [field] attribute -->
+    <input matInput placeholder="Name" [field]="loginForm.name" />
+  </mat-form-field>
+  <mat-form-field appearance="outline" class="flex-item">
+    <mat-label>Password</mat-label>
+    <!-- We bind form fields to template code using the [field] attribute -->
+    <input
+      matInput
+      type="password"
+      placeholder="Password"
+      [field]="loginForm.password" />
+  </mat-form-field>
+  <button type="submit" form="login-form" mat-raised-button>Login</button>
+</form>

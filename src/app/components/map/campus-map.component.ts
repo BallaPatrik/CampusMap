@@ -18,7 +18,7 @@ import {take} from 'rxjs';
   styleUrl: './campus-map.component.css',
 })
 export class CampusMapComponent implements OnInit{
-  private readonly request_service=inject(RequestService);
+  private readonly requestService=inject(RequestService);
 
   protected style!: StyleSpecification;
   protected pois: FeatureCollection = {
@@ -34,12 +34,18 @@ export class CampusMapComponent implements OnInit{
       layers: [],
     };
 
-    this.request_service
+    this.requestService
+      //Send a get request to the json server to get the features
       .get<Feature<Geometry, GeoJsonProperties>[]>('http://localhost:3000/features')
+      //Take the 1st response
       .pipe(take(1))
+      //We subscribe
       .subscribe((features) => {
+        //Set the text color to blue
         features.forEach((feature) => {
-          feature.properties ??= {};
+          if (feature.properties == null) {
+            feature.properties = {};
+          }
           feature.properties['color'] = 'blue';
         });
 

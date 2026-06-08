@@ -90,7 +90,7 @@
     {
       "id": 1,
       "name": "admin",
-      "password": "pw",
+      "password": "test01",
       "isLoggedIn": false
     },
     {
