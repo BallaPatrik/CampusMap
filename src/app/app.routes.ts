@@ -6,7 +6,12 @@ import {BuildingList} from './components/building-list/building-list';
 export const routes: Routes = [
   {
     path: '',
-    component: Login
+    redirectTo: 'login',
+    pathMatch: 'full',
+  },
+  {
+    path: 'login',
+    component: Login,
   },
   {
     path: 'map',

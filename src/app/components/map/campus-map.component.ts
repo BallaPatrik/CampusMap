@@ -1,27 +1,13 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {StyleSpecification, Map as MapLibreMap, IControl, Popup} from 'maplibre-gl';
 import MapLibreDraw from 'maplibre-gl-draw';
-import { FeatureCollection, Polygon, Feature } from 'geojson';
-import pois from '../../pois.json';
-//import pois from '../../pois.json';
-//EZ JÖN
-
-
-
-
-
-
-
-
-
-
-
-
-
+import {FeatureCollection, Polygon, Feature, Geometry, GeoJsonProperties} from 'geojson';
 import {
   NgxMapLibreGLModule
 } from '@maplibre/ngx-maplibre-gl';
 import { centroid } from '@turf/turf';
+import {RequestService} from '../../services/request.service';
+import {take} from 'rxjs';
 
 @Component({
   selector: 'app-map',
@@ -32,6 +18,15 @@ import { centroid } from '@turf/turf';
   styleUrl: './campus-map.component.css',
 })
 export class CampusMapComponent implements OnInit{
+  private readonly request_service=inject(RequestService);
+
+  protected style!: StyleSpecification;
+  protected pois: FeatureCollection = {
+    type: 'FeatureCollection',
+    features: [],
+  };
+  protected draw!: MapLibreDraw;
+
   ngOnInit() {
     this.style = {
       version: 8,
@@ -39,10 +34,20 @@ export class CampusMapComponent implements OnInit{
       layers: [],
     };
 
-    this.pois = pois as FeatureCollection;
-    this.pois.features.forEach((f) => {
-      f.properties!['color'] = 'blue';
-    });
+    this.request_service
+      .get<Feature<Geometry, GeoJsonProperties>[]>('http://localhost:3000/features')
+      .pipe(take(1))
+      .subscribe((features) => {
+        features.forEach((feature) => {
+          feature.properties ??= {};
+          feature.properties['color'] = 'blue';
+        });
+
+        this.pois = {
+          type: 'FeatureCollection',
+          features,
+        };
+      });
   }
 
   onMapLoad(map: MapLibreMap) {
@@ -100,8 +105,4 @@ export class CampusMapComponent implements OnInit{
     });
 
   }
-
-  protected style!: StyleSpecification;
-  protected pois!: FeatureCollection;
-  protected draw!: MapLibreDraw;
 }
