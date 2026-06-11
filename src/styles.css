@@ -5,3 +5,22 @@
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
+.error-snackbar .mdc-snackbar__surface {
+  background-color: #d32f2f !important;
+}
+.error-snackbar .mdc-snackbar__label {
+  color: #ffffff !important;
+}
+.error-snackbar .mat-mdc-snack-bar-action {
+  color: #ffffff !important;
+}
+
+.success-snackbar .mdc-snackbar__surface {
+  background-color: #008000 !important;
+}
+.success-snackbar .mdc-snackbar__label {
+  color: #ffffff !important;
+}
+.success-snackbar .mat-mdc-snack-bar-action {
+  color: #ffffff !important;
+}

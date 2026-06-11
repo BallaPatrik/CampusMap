@@ -7,17 +7,17 @@
   <h1>Please login</h1>
   <mat-form-field appearance="outline" class="flex-item">
     <mat-label>Name</mat-label>
-    <!-- We bind form fields to template code using the [field] attribute -->
-    <input matInput placeholder="Name" [field]="loginForm.name" />
+    <!-- We bind form fields to template code using the [formField] attribute -->
+    <input matInput placeholder="Name" [formField]="loginForm.name" />
   </mat-form-field>
   <mat-form-field appearance="outline" class="flex-item">
     <mat-label>Password</mat-label>
-    <!-- We bind form fields to template code using the [field] attribute -->
+    <!-- We bind form fields to template code using the [formField] attribute -->
     <input
       matInput
       type="password"
       placeholder="Password"
-      [field]="loginForm.password" />
+      [formField]="loginForm.password" />
   </mat-form-field>
   <button type="submit" form="login-form" mat-raised-button>Login</button>
 </form>

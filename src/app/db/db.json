@@ -10,8 +10,12 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [17.903889, 47.095556]
-      }
+        "coordinates": [
+          17.903889,
+          47.095556
+        ]
+      },
+      "id": "caICK1PNGSI"
     },
     {
       "type": "Feature",
@@ -22,8 +26,12 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [17.905514, 47.094772]
-      }
+        "coordinates": [
+          17.905514,
+          47.094772
+        ]
+      },
+      "id": "68k2HB1U804"
     },
     {
       "type": "Feature",
@@ -34,8 +42,12 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [17.902839, 47.097119]
-      }
+        "coordinates": [
+          17.902839,
+          47.097119
+        ]
+      },
+      "id": "U3Y3wmh-Kic"
     },
     {
       "type": "Feature",
@@ -46,8 +58,12 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [17.902222, 47.0975]
-      }
+        "coordinates": [
+          17.902222,
+          47.0975
+        ]
+      },
+      "id": "EPjXGKmqsuc"
     },
     {
       "type": "Feature",
@@ -58,8 +74,12 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [17.90595, 47.095043]
-      }
+        "coordinates": [
+          17.90595,
+          47.095043
+        ]
+      },
+      "id": "QeStJZPe42M"
     },
     {
       "type": "Feature",
@@ -70,8 +90,12 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [17.893333, 47.0925]
-      }
+        "coordinates": [
+          17.893333,
+          47.0925
+        ]
+      },
+      "id": "atpNkm1-mV0"
     },
     {
       "type": "Feature",
@@ -82,29 +106,32 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [17.9115, 47.0933]
-      }
+        "coordinates": [
+          17.9115,
+          47.0933
+        ]
+      },
+      "id": "A5AjnXBYgRI"
     }
   ],
   "people": [
     {
-      "id": 1,
+      "id": "1",
       "name": "admin",
       "password": "test01",
       "isLoggedIn": false
     },
     {
-      "id": 2,
+      "id": "2",
       "name": "test1",
       "password": "test1",
       "isLoggedIn": false
     },
     {
-      "id": 3,
+      "id": "3",
       "name": "test2",
       "password": "test2",
       "isLoggedIn": false
     }
   ]
 }
-
