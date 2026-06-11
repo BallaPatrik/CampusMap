@@ -1,15 +1,12 @@
 import {Component, inject, OnInit} from '@angular/core';
-import {StyleSpecification, Map as MapLibreMap, IControl, Popup} from 'maplibre-gl';
-import MapLibreDraw from 'maplibre-gl-draw';
-import { FeatureCollection, Polygon, Feature } from 'geojson';
 import { NgxMapLibreGLModule } from '@maplibre/ngx-maplibre-gl';
-import { centroid } from '@turf/turf';
 import {Router, RouterLink, RouterOutlet} from '@angular/router';
 import {LocalStorageKeys} from './constants/local-storage-keys';
 import {MatIcon} from '@angular/material/icon';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 import {IconService} from './services/icon.service';
+import {AuthService} from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -20,7 +17,8 @@ import {IconService} from './services/icon.service';
 export class App implements OnInit {
 
   private readonly icon_service=inject(IconService);
-  readonly router = inject(Router);
+  private readonly router = inject(Router);
+  private readonly authService=inject(AuthService);
 
   ngOnInit(): void {
     //Add the icons to the list
@@ -32,7 +30,8 @@ export class App implements OnInit {
   }
 
   onLogout() {
-    localStorage.removeItem(LocalStorageKeys.TOKEN);
-    this.router.navigateByUrl('login');
+    this.authService.logout().subscribe(() => {
+      this.router.navigateByUrl('api/login');
+    });
   }
 }

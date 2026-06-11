@@ -6,19 +6,19 @@ import {BuildingList} from './components/building-list/building-list';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'login',
+    redirectTo: 'api/login',
     pathMatch: 'full',
   },
   {
-    path: 'login',
+    path: 'api/login',
     component: Login,
   },
   {
-    path: 'map',
+    path: 'api/map',
     component: CampusMapComponent,
   },
   {
-    path: 'buildings',
+    path: 'api/buildings',
     component: BuildingList,
   },
   {

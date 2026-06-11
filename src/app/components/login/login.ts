@@ -24,7 +24,7 @@ export class Login implements OnInit {
 
   ngOnInit() {
     if (localStorage.getItem(LocalStorageKeys.TOKEN) !== null) {
-      this.router.navigateByUrl('/map');
+      this.router.navigateByUrl('/api/map');
     }
   }
 
@@ -34,7 +34,7 @@ export class Login implements OnInit {
         if (token) {
           localStorage.setItem(LocalStorageKeys.TOKEN, token);
           this.messageService.SendSuccessMessageSnackbar('Login Successful!', 'X');
-          this.router.navigateByUrl('/map');
+          this.router.navigateByUrl('/api/map');
         } else {
           this.messageService.SendErrorMessageSnackbar('Wrong email or password!', 'X');
         }

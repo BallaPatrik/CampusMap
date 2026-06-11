@@ -116,19 +116,19 @@
   ],
   "people": [
     {
-      "id": 1,
+      "id": "0",
       "name": "admin",
       "password": "test01",
       "isLoggedIn": false
     },
     {
-      "id": 2,
+      "id": "1",
       "name": "test1",
       "password": "test1",
       "isLoggedIn": false
     },
     {
-      "id": 3,
+      "id": "2",
       "name": "test2",
       "password": "test2",
       "isLoggedIn": false

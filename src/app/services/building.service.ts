@@ -12,7 +12,7 @@ export class BuildingService {
     return this.requestService.get<Building[]>(BUILDING_URL);
   }
 
-  getBuildingById(buildingId: Building) {
+  getBuildingById(buildingId: number) {
     return this.requestService.get<Building>(`${BUILDING_URL}/${buildingId}`);
   }
 
@@ -20,7 +20,7 @@ export class BuildingService {
     return this.requestService.post<Building>(`${BUILDING_URL}`, building);
   }
 
-  deleteBuilding(buildingId: number) {
+  deleteBuildingById(buildingId: number) {
     return this.requestService.delete<Building>(`${BUILDING_URL}/${buildingId}`);
   }
 }
