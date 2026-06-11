@@ -33,10 +33,10 @@ export class Login implements OnInit {
       .subscribe((token) => {
         if (token) {
           localStorage.setItem(LocalStorageKeys.TOKEN, token);
-          this.messageService.SuccessMessageSnackbar('Login Successful!', 'Close');
+          this.messageService.SendSuccessMessageSnackbar('Login Successful!', 'X');
           this.router.navigateByUrl('/map');
         } else {
-          this.messageService.ErrorMessageSnackbar('Wrong email or password!', 'Close');
+          this.messageService.SendErrorMessageSnackbar('Wrong email or password!', 'X');
         }
       });
   }

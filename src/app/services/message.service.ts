@@ -6,7 +6,7 @@ export class MessageService {
 
   private readonly snackBar = inject(MatSnackBar);
 
-  ErrorMessageSnackbar(message: string, action: string) {
+  SendErrorMessageSnackbar(message: string, action: string) {
     this.snackBar.open(message, action, {
       duration: 3000,
       horizontalPosition: 'center',
@@ -14,7 +14,7 @@ export class MessageService {
       panelClass: ['error-snackbar'],
     });
   }
-  SuccessMessageSnackbar(message: string, action: string) {
+  SendSuccessMessageSnackbar(message: string, action: string) {
     this.snackBar.open(message, action, {
       duration: 3000,
       horizontalPosition: 'center',
