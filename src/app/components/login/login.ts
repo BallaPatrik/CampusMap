@@ -29,15 +29,16 @@ export class Login implements OnInit {
   }
 
   onLogin(name: string, password: string) {
-    this.authService.login(name, password).subscribe((token) => {
-      if (token) {
-        localStorage.setItem(LocalStorageKeys.TOKEN, token);
-        this.messageService.SuccessMessageSnackbar('Login Successful!', 'Close');
-        this.router.navigateByUrl('/map');
-      } else {
-        this.messageService.ErrorMessageSnackbar('Wrong email or password!', 'Close');
-      }
-    });
+    this.authService.login(name, password)
+      .subscribe((token) => {
+        if (token) {
+          localStorage.setItem(LocalStorageKeys.TOKEN, token);
+          this.messageService.SuccessMessageSnackbar('Login Successful!', 'Close');
+          this.router.navigateByUrl('/map');
+        } else {
+          this.messageService.ErrorMessageSnackbar('Wrong email or password!', 'Close');
+        }
+      });
   }
 
   //we specify the form model and the initial state as a signal
