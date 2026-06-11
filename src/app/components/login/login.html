@@ -5,11 +5,13 @@
   (ngSubmit)="onLogin(personModel().name, personModel().password)"
 >
   <h1>Please login</h1>
+
   <mat-form-field appearance="outline" class="flex-item">
     <mat-label>Name</mat-label>
     <!-- We bind form fields to template code using the [formField] attribute -->
-    <input matInput placeholder="Name" [formField]="loginForm.name" />
+    <input matInput placeholder="Name" [formField]="loginForm.name"/>
   </mat-form-field>
+
   <mat-form-field appearance="outline" class="flex-item">
     <mat-label>Password</mat-label>
     <!-- We bind form fields to template code using the [formField] attribute -->
@@ -17,7 +19,24 @@
       matInput
       type="password"
       placeholder="Password"
-      [formField]="loginForm.password" />
+      [formField]="loginForm.password"/>
   </mat-form-field>
-  <button type="submit" form="login-form" mat-raised-button>Login</button>
+
+  <div>
+    <button type="submit" form="login-form" mat-raised-button>Login</button>
+  </div>
+
+  <div class="error-message">
+    @if (loginForm.name().invalid()) {
+      <mat-error>
+        {{ getNameErrorMessage() }}
+      </mat-error>
+    }
+    @if (loginForm.password().invalid()) {
+    <mat-error>
+      {{ getPasswordErrorMessage() }}
+    </mat-error>
+  }
+  </div>
+
 </form>
