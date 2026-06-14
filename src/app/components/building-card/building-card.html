@@ -1,0 +1,15 @@
+<mat-card [style.width]="'25vw'">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-checkbox (change)="onSelect()"></mat-checkbox>
+      {{ building().name }}
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <p>{{ building().description }}</p>
+    <p>
+      <strong>Category:</strong> {{ building().category }}
+    </p>
+    <p>Coordinates: {{ building().coordinates[0] }}, {{ building().coordinates[1] }}</p>
+  </mat-card-content>
+</mat-card>

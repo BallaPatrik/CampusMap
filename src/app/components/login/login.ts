@@ -1,13 +1,13 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { AuthService } from '../../services/auth.service';
-import { LocalStorageKeys } from '../../constants/local-storage-keys';
-import { Router } from '@angular/router';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
+import {AuthService} from '../../services/auth.service';
+import {LocalStorageKeys} from '../../constants/local-storage-keys';
+import {Router} from '@angular/router';
 import {MatError, MatFormField, MatLabel} from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { FormField, form, minLength, required } from '@angular/forms/signals';
-import { User } from '../../model/user.model';
-import { FormsModule } from '@angular/forms';
+import {MatInput} from '@angular/material/input';
+import {form, FormField, minLength, required} from '@angular/forms/signals';
+import {User} from '../../model/user.model';
+import {FormsModule} from '@angular/forms';
 import {MessageService} from '../../services/message.service';
 
 @Component({
@@ -19,7 +19,7 @@ import {MessageService} from '../../services/message.service';
 export class Login implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-  private readonly messageService=inject(MessageService)
+  private readonly messageService = inject(MessageService);
 
 
   ngOnInit() {

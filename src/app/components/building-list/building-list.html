@@ -1,1 +1,15 @@
-<p>building-list works!</p>
+<h1 class="page-title">Buildings</h1>
+
+<button mat-fab extended class="add-button" (click)="onCreate()">
+  <mat-icon>add</mat-icon>
+  Add new
+</button>
+
+<div class="building-grid">
+  @for (building of buildings(); track building.id) {
+    <app-building-card
+      [building]="building"
+    />
+  }
+</div>
+<!--      (selectAction)="onSelect($event)"-->

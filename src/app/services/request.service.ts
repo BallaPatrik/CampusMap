@@ -1,6 +1,6 @@
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { catchError, Observable, throwError } from 'rxjs';
+import {inject, Injectable} from '@angular/core';
+import {catchError, Observable, throwError} from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class RequestService {
@@ -33,12 +33,21 @@ export class RequestService {
     } else {
       // The backend returned an unsuccessful response code.
       // The response body may contain clues as to what went wrong
+      const body =
+        typeof error.error === 'string'
+          ? error.error
+          : JSON.stringify(error.error, null, 2);
+
       console.error(
         `Backend returned code ${error.status}, ` +
-        `body was: ${error.error}`);
+        `body was: ${body}`
+      );
+
+      console.error('Full HTTP error:', error);
     }
+
     // return an observable with a user-facing error message
-    return throwError(()=>'Something bad happened; please try again later.');
+    return throwError(() => 'Something bad happened; please try again later.');
   };
 
 }

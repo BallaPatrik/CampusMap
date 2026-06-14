@@ -1,9 +1,9 @@
 export interface Building {
-  id?: number;
+  id?: string;
   name: string;
   category: string;
   description: string;
-  geometry: string;
+  coordinates: [number, number];
   userId?: number;
 }
 
