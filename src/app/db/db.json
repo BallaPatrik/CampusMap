@@ -1,6 +1,5 @@
 {
-  "type": "FeatureCollection",
-  "features": [
+  "buildings": [
     {
       "type": "Feature",
       "properties": {
@@ -119,7 +118,7 @@
       "id": "0",
       "name": "admin",
       "password": "test01",
-      "isLoggedIn": false
+      "isLoggedIn": true
     },
     {
       "id": "1",

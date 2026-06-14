@@ -36,7 +36,7 @@ export class CampusMapComponent implements OnInit{
 
     this.requestService
       //Send a get request to the json server to get the features
-      .get<Feature<Geometry, GeoJsonProperties>[]>('http://localhost:3000/features')
+      .get<Feature<Geometry, GeoJsonProperties>[]>('http://localhost:3000/buildings')
       //Take the 1st response
       .pipe(take(1))
       //We subscribe
