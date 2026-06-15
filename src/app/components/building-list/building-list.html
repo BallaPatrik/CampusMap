@@ -6,13 +6,13 @@
     Add new building
   </button>
 
-  @if (this.selectedBuildingIds().length > 0) {
+  @if (this.selectedBuildingCount() > 0) {
     <button matFab extended>
       <mat-icon>remove</mat-icon>
       Remove selected building(s)
     </button>
   }
-  @if (this.selectedBuildingIds().length == 1) {
+  @if (this.selectedBuildingCount() == 1) {
     <button matFab extended>
       <mat-icon>edit</mat-icon>
       Edit selected building
@@ -20,7 +20,7 @@
   }
 </div>
 <div>
-  <p>Selected: {{ this.selectedBuildingIds().length }}</p>
+  <p>Selected: {{ this.selectedBuildingCount() }} building(s)</p>
 </div>
 
 <input
@@ -29,6 +29,9 @@
   [value]="searchString()"
   (input)="searchString.set($any($event.target).value)"
 >
+<!--$event.target is the input element-->
+<!--($event.target).value is the value of the input element-->
+<!--$any is used to cast the value to any type-->
 
 <div class="building-grid">
   @for (building of allBuildings() | buildingSearch: searchString(); track building.id) {
