@@ -76,6 +76,13 @@ export class BuildingList implements OnInit {
         ...this.selectedBuildingIds(),
         buildingId]);
     }
+      //This part handles when we add the building to the selection
+    //If the building is NOT selected, we add it from the selection
+    else {
+      this.selectedBuildingIds.set([
+        ...this.selectedBuildingIds(),
+        buildingId]);
+    }
   }
 
 
