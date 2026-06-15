@@ -23,9 +23,15 @@
   <p>Selected: {{ this.selectedBuildingIds().length }}</p>
 </div>
 
+<input
+  type="text"
+  placeholder="Search buildings..."
+  [value]="searchString()"
+  (input)="searchString.set($any($event.target).value)"
+>
 
 <div class="building-grid">
-  @for (building of allBuildings(); track building.id) {
+  @for (building of allBuildings() | buildingSearch: searchString(); track building.id) {
     <app-building-card
       [building]="building" (selectAction)="onSelect($event)"
     />

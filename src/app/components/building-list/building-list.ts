@@ -6,14 +6,18 @@ import {MessageService} from '../../services/message.service';
 import {BuildingService} from '../../services/building.service';
 import {Building} from '../../model/building.model';
 import {BuildingCard} from '../building-card/building-card';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {BuildingSearchPipe} from '../../pipes/building.search.pipe';
 
 @Component({
   selector: 'app-building-list',
   imports: [
     MatFabButton,
     MatIcon,
-    BuildingCard
-
+    BuildingCard,
+    ReactiveFormsModule,
+    FormsModule,
+    BuildingSearchPipe
   ],
   templateUrl: './building-list.html',
   styleUrl: './building-list.css',
@@ -44,6 +48,8 @@ export class BuildingList implements OnInit {
     coordinates: [0, 0]
   });
 
+  searchString = signal<string>('');
+
   onCreate() {
     this.router.navigateByUrl('/create');
   }
@@ -55,13 +61,7 @@ export class BuildingList implements OnInit {
       this.selectedBuildingIds.set(
         this.selectedBuildingIds().filter(id => id !== buildingId)
       );
-    } else {
-      this.selectedBuildingIds.set([
-        ...this.selectedBuildingIds(),
-        buildingId
-      ]);
     }
-
   }
 
 
