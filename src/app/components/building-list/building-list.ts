@@ -67,14 +67,6 @@ export class BuildingList implements OnInit {
         //and we set the new array to the filtered array.
         this.selectedBuildingIds().filter(id => id !== buildingId)
       );
-      console.log("[IF AG] After the set:" + this.selectedBuildingIds())
-    }
-      //This part handles when we add the building to the selection
-    //If the building is NOT selected, we add it from the selection
-    else {
-      this.selectedBuildingIds.set([
-        ...this.selectedBuildingIds(),
-        buildingId]);
     }
       //This part handles when we add the building to the selection
     //If the building is NOT selected, we add it from the selection
