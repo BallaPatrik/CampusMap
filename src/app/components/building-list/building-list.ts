@@ -61,11 +61,6 @@ export class BuildingList implements OnInit {
       this.selectedBuildingIds.set(
         this.selectedBuildingIds().filter(id => id !== buildingId)
       );
-    } else {
-      this.selectedBuildingIds.set([
-        ...this.selectedBuildingIds(),
-        buildingId
-      ]);
     }
   }
 
