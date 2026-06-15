@@ -33,6 +33,14 @@
 <!--($event.target).value is the value of the input element-->
 <!--$any is used to cast the value to any type-->
 
+<!--Template variable for filtered buildings-->
+@let filteredBuildings = allBuildings() | buildingSearch: searchString();
+
+<!--Trim: remove whitespace characters from the beginning and end of the string.-->
+@if (searchString().trim() && filteredBuildings.length === 0) {
+  <p class="search-error-message">No buildings found matching your search.</p>
+}
+
 <div class="building-grid">
   @for (building of allBuildings() | buildingSearch: searchString(); track building.id) {
     <app-building-card
