@@ -23,12 +23,12 @@ export class BuildingList implements OnInit {
   private readonly messageService = inject(MessageService);
   private readonly buildingService = inject(BuildingService);
 
-  readonly buildings = signal<Building[]>([]);
+  readonly allBuildings = signal<Building[]>([]);
 
   ngOnInit() {
     this.buildingService.getBuildings().subscribe({
       next: buildings => {
-        this.buildings.set(buildings);
+        this.allBuildings.set(buildings);
       },
       error: err => {
         console.error('Failed to load buildings:', err);
@@ -36,7 +36,7 @@ export class BuildingList implements OnInit {
     });
   }
 
-  buildingModel = signal<Building>({
+  buildingInitialValue = signal<Building>({
     id: '',
     name: '',
     category: '',
@@ -44,18 +44,25 @@ export class BuildingList implements OnInit {
     coordinates: [0, 0]
   });
 
-
   onCreate() {
     this.router.navigateByUrl('/create');
   }
 
-  // onSelect(buildingId: string) {
-  //   if (this.buildings().includes(buildingId)) {
-  //     this.buildings.set(this.buildings().filter((id) => id !== buildingId));
-  //   } else {
-  //     this.buildings.set([...this.buildings(), buildingId]);
-  //   }
-  // }
+  readonly selectedBuildingIds = signal<string[]>([]);
+
+  onSelect(buildingId: string) {
+    if (this.selectedBuildingIds().includes(buildingId)) {
+      this.selectedBuildingIds.set(
+        this.selectedBuildingIds().filter(id => id !== buildingId)
+      );
+    } else {
+      this.selectedBuildingIds.set([
+        ...this.selectedBuildingIds(),
+        buildingId
+      ]);
+    }
+
+  }
 
 
   // onDeleteMany() {

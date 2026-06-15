@@ -1,15 +1,35 @@
 <h1 class="page-title">Buildings</h1>
 
-<button mat-fab extended class="add-button" (click)="onCreate()">
-  <mat-icon>add</mat-icon>
-  Add new
-</button>
+<div class="button-container">
+  <button mat-fab extended class="add-button" (click)="onCreate()">
+    <mat-icon>add</mat-icon>
+    Add new building
+  </button>
+
+  @if (this.selectedBuildingIds().length > 0) {
+    <button matFab extended>
+      <mat-icon>remove</mat-icon>
+      Remove selected building(s)
+    </button>
+  }
+  @if (this.selectedBuildingIds().length == 1) {
+    <button matFab extended>
+      <mat-icon>edit</mat-icon>
+      Edit selected building
+    </button>
+  }
+</div>
+<div>
+  <p>Selected: {{ this.selectedBuildingIds().length }}</p>
+</div>
+
 
 <div class="building-grid">
-  @for (building of buildings(); track building.id) {
+  @for (building of allBuildings(); track building.id) {
     <app-building-card
-      [building]="building"
+      [building]="building" (selectAction)="onSelect($event)"
     />
   }
 </div>
-<!--      (selectAction)="onSelect($event)"-->
+
+<!--(click)="onDeleteMany()"-->

@@ -22,3 +22,8 @@
   gap: 1rem 2rem;
   align-items: stretch;
 }
+
+.button-container {
+  display: flex;
+  gap: 20px;
+}
