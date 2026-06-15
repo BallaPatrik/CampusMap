@@ -56,6 +56,7 @@ export class BuildingList implements OnInit {
 
   //we can derive the form's state with computed fields
   selectedBuildingCount = computed(() => this.selectedBuildingIds().length);
+
   readonly selectedBuildingIds = signal<string[]>([]);
 
   onSelect(buildingId: string) {
