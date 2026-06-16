@@ -4,25 +4,27 @@
   id="login-form"
   (ngSubmit)="onLogin(personModel().name, personModel().password)"
 >
-  <h1>Please login</h1>
+  <h1 class="page-title">Login page</h1>
 
-  <mat-form-field appearance="outline" class="flex-item">
-    <mat-label>Name</mat-label>
-    <!-- We bind form fields to template code using the [formField] attribute -->
-    <input matInput placeholder="Name" [formField]="loginForm.name"/>
-  </mat-form-field>
+  <div class="input-container">
+    <mat-form-field appearance="outline" class="flex-item">
+      <mat-label>Name</mat-label>
+      <!-- We bind form fields to template code using the [formField] attribute -->
+      <input matInput placeholder="Name" [formField]="loginForm.name"/>
+    </mat-form-field>
 
-  <mat-form-field appearance="outline" class="flex-item">
-    <mat-label>Password</mat-label>
-    <!-- We bind form fields to template code using the [formField] attribute -->
-    <input
-      matInput
-      type="password"
-      placeholder="Password"
-      [formField]="loginForm.password"/>
-  </mat-form-field>
+    <mat-form-field appearance="outline" class="flex-item">
+      <mat-label>Password</mat-label>
+      <!-- We bind form fields to template code using the [formField] attribute -->
+      <input
+        matInput
+        type="password"
+        placeholder="Password"
+        [formField]="loginForm.password"/>
+    </mat-form-field>
+  </div>
 
-  <div>
+  <div class="button-container">
     <button type="submit" form="login-form" mat-raised-button>Login</button>
   </div>
 

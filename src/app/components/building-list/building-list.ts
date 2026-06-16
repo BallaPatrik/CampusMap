@@ -37,7 +37,7 @@ export class BuildingList implements OnInit {
   searchString = signal<string>('');
 
   onCreate() {
-    this.router.navigateByUrl('/create');
+    this.router.navigateByUrl('/api/building/create');
   }
 
   //we can derive the form's state with computed fields

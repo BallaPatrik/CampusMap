@@ -1,0 +1,58 @@
+<!--  We need to prevent page reload on form submit so we use (ngSubmit) instead of (submit)-->
+<form
+  class="create-building-form"
+  id="create-building-form"
+  (ngSubmit)="onCreate()"
+>
+  <h1 class="page-title">Create building</h1>
+
+  <div class="input-container">
+
+    <mat-form-field appearance="outline" class="flex-item">
+      <mat-label>Name</mat-label>
+      <!-- We bind form fields to template code using the [formField] attribute -->
+      <input matInput placeholder="Name" [formField]="createBuildingForm.name"/>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="flex-item">
+      <mat-label>Category</mat-label>
+      <!-- We bind form fields to template code using the [formField] attribute -->
+      <input matInput placeholder="Category" [formField]="createBuildingForm.category"/>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="flex-item">
+      <mat-label>Description</mat-label>
+      <!-- We bind form fields to template code using the [formField] attribute -->
+      <input matInput placeholder="Description" [formField]="createBuildingForm.description"/>
+    </mat-form-field>
+
+  </div>
+
+  <div class="button-container">
+    <button type="submit" form="create-building-form" mat-raised-button>Create building</button>
+  </div>
+
+  <div class="error-message">
+    @if (createBuildingForm.name().invalid()) {
+      <mat-error>
+        {{ getNameErrorMessage() }}
+      </mat-error>
+    }
+    @if (createBuildingForm.category().invalid()) {
+      <mat-error>
+        {{ getCategoryErrorMessage() }}
+      </mat-error>
+    }
+    @if (createBuildingForm.description().invalid()) {
+      <mat-error>
+        {{ getDescriptionErrorMessage() }}
+      </mat-error>
+    }
+    @if (createBuildingForm.coordinates().invalid()) {
+      <mat-error>
+        {{ getCoordinatesErrorMessage() }}
+      </mat-error>
+    }
+  </div>
+
+</form>

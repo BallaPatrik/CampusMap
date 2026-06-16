@@ -1,11 +1,9 @@
 import {Component, inject, OnInit} from '@angular/core';
-import {StyleSpecification, Map as MapLibreMap, IControl, Popup} from 'maplibre-gl';
+import {IControl, Map as MapLibreMap, Popup, StyleSpecification} from 'maplibre-gl';
 import MapLibreDraw from 'maplibre-gl-draw';
-import {FeatureCollection, Polygon, Feature, Geometry, GeoJsonProperties} from 'geojson';
-import {
-  NgxMapLibreGLModule
-} from '@maplibre/ngx-maplibre-gl';
-import { centroid } from '@turf/turf';
+import {Feature, FeatureCollection, GeoJsonProperties, Geometry, Polygon} from 'geojson';
+import {NgxMapLibreGLModule} from '@maplibre/ngx-maplibre-gl';
+import {centroid} from '@turf/turf';
 import {RequestService} from '../../services/request.service';
 import {take} from 'rxjs';
 
@@ -51,7 +49,7 @@ export class CampusMapComponent implements OnInit{
 
         this.pois = {
           type: 'FeatureCollection',
-          features,
+          features
         };
       });
   }
