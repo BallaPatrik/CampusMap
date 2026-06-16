@@ -8,6 +8,7 @@ import {Building} from '../../model/building.model';
 import {BuildingCard} from '../building-card/building-card';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {BuildingSearchPipe} from '../../pipes/building.search.pipe';
+import {forkJoin, take} from 'rxjs';
 
 @Component({
   selector: 'app-building-list',
@@ -27,26 +28,11 @@ export class BuildingList implements OnInit {
   private readonly messageService = inject(MessageService);
   private readonly buildingService = inject(BuildingService);
 
-  readonly allBuildings = signal<Building[]>([]);
+  allBuildings = signal<Building[]>([]);
 
   ngOnInit() {
-    this.buildingService.getBuildings().subscribe({
-      next: buildings => {
-        this.allBuildings.set(buildings);
-      },
-      error: err => {
-        console.error('Failed to load buildings:', err);
-      }
-    });
+    this.getAllBuildings();
   }
-
-  buildingInitialValue = signal<Building>({
-    id: '',
-    name: '',
-    category: '',
-    description: '',
-    coordinates: [0, 0]
-  });
 
   searchString = signal<string>('');
 
@@ -57,7 +43,7 @@ export class BuildingList implements OnInit {
   //we can derive the form's state with computed fields
   selectedBuildingCount = computed(() => this.selectedBuildingIds().length);
 
-  readonly selectedBuildingIds = signal<string[]>([]);
+  selectedBuildingIds = signal<string[]>([]);
 
   onSelect(buildingId: string) {
     //This handles the selection of the building
@@ -80,16 +66,30 @@ export class BuildingList implements OnInit {
     }
   }
 
+  onDeleteMany() {
+    let selectedBuildingIds = this.selectedBuildingIds();
+    let selectedBuildingNames = selectedBuildingIds.map(
+      buildingId => this.allBuildings().find(building => building.id === buildingId)?.name);
 
-  // onDeleteMany() {
-  //   forkJoin(this.selectedRecipes().map((recipeId) => this.recipeService.deleteRecipe(recipeId)))
-  //     .pipe(take(1))
-  //     .subscribe(() => {
-  //       alert('Successfully deleted!');
-  //       this.recipes$ = this.recipeService.getRecipes();
-  //     });
-  //
-  //   this.selectedRecipes.set([]);
-  // }
+    forkJoin(this.selectedBuildingIds().map((buildingId) =>
+      this.buildingService.deleteBuildingById(buildingId)))
+      .pipe(take(1))
+      .subscribe(() => {
+        this.getAllBuildings();
+      });
+    this.messageService.SendSuccessMessageSnackbar('Successfully deleted buildings: ' + selectedBuildingNames + '!', 'X');
+    this.selectedBuildingIds.set([]);
+  }
+
+  getAllBuildings() {
+    this.buildingService.getBuildings().subscribe({
+      next: buildings => {
+        this.allBuildings.set(buildings);
+      },
+      error: err => {
+        console.error('Failed to load buildings:', err);
+      }
+    });
+  }
 
 }

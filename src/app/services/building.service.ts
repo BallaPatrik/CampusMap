@@ -41,15 +41,35 @@ export class BuildingService {
     );
   }
 
-  getBuildingById(buildingId: number) {
-    return this.requestService.get<Building>(`${BUILDING_URL}/${buildingId}`);
+  getBuildingById(buildingId: string) {
+    return this.requestService.get<BuildingFeature[]>(BUILDING_URL).pipe(
+      //Map the response, because we need parts of the response
+      map(features => {
+        //Find the building with the given id
+        const feature = features.find(f => f.id === buildingId);
+
+        //If the building is not found, return undefined
+        if (!feature) {
+          return undefined;
+        }
+
+        //Else return the building
+        return {
+          id: feature.id,
+          name: feature.properties.name,
+          category: feature.properties.category,
+          description: feature.properties.description,
+          coordinates: feature.geometry.coordinates
+        };
+      })
+    );
   }
 
   createBuilding(building: Building) {
     return this.requestService.post<Building>(`${BUILDING_URL}`, building);
   }
 
-  deleteBuildingById(buildingId: number) {
+  deleteBuildingById(buildingId: string) {
     return this.requestService.delete<Building>(`${BUILDING_URL}/${buildingId}`);
   }
 }
