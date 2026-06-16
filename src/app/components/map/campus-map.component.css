@@ -10,3 +10,8 @@ mgl-map {
   height: 80%;
   width: 80%;
 }
+
+.page-title {
+  text-align: center;
+  margin: 1rem 0 1.5rem;
+}

@@ -77,7 +77,8 @@ export class BuildingList implements OnInit {
       .subscribe(() => {
         this.getAllBuildings();
       });
-    this.messageService.SendSuccessMessageSnackbar('Successfully deleted buildings: ' + selectedBuildingNames + '!', 'X');
+    this.messageService.SendSuccessMessageSnackbar('Successfully deleted buildings: '
+      + selectedBuildingNames + '!', 'X');
     this.selectedBuildingIds.set([]);
   }
 
