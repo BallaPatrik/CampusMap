@@ -32,11 +32,23 @@ export class CreateBuilding {
     const building: Building = {
       ...this.buildingModel()
     };
+
+    //Create the building
     this.buildingService.createBuilding(building)
-      .subscribe((building) => {
+      .subscribe({
+        //After we successfully create the building, we send a message and navigate to the map page
+        next: createdBuilding => {
+          this.messageService.SendSuccessMessageSnackbar(
+            'Successfully created building: ' + createdBuilding.name + '!',
+            'X'
+          );
+
+          this.router.navigateByUrl('/api/map');
+        },
+        error: err => {
+          console.error('Failed to create building:', err);
+        }
       });
-    this.messageService.SendSuccessMessageSnackbar('Successfully created building: ' + building.name + '!', 'X');
-    this.router.navigateByUrl('/api/map');
   }
 
   //we specify the form model and the initial state as a signal

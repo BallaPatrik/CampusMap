@@ -8,6 +8,7 @@ const BUILDING_URL = 'http://localhost:3000/buildings';
 //Add a type for the building feature
 type BuildingFeature = {
   id: string;
+  type: 'Feature';
   properties: {
     name: string;
     category: string;
@@ -66,7 +67,31 @@ export class BuildingService {
   }
 
   createBuilding(building: Building) {
-    return this.requestService.post<Building>(`${BUILDING_URL}`, building);
+    //Construct the building feature without the id (omit)
+    const buildingFeature: Omit<BuildingFeature, 'id'> = {
+      type: 'Feature',
+      properties: {
+        name: building.name,
+        category: building.category,
+        description: building.description
+      },
+      geometry: {
+        type: 'Point',
+        coordinates: building.coordinates
+      }
+    };
+
+    //Send a POST request to the server with the building feature
+    return this.requestService.post<BuildingFeature>(BUILDING_URL, buildingFeature).pipe(
+      //Map because we only need parts of the response
+      map(feature => ({
+        id: feature.id,
+        name: feature.properties.name,
+        category: feature.properties.category,
+        description: feature.properties.description,
+        coordinates: feature.geometry.coordinates
+      }))
+    );
   }
 
   deleteBuildingById(buildingId: string) {

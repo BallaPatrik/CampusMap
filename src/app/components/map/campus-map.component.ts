@@ -1,11 +1,12 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {IControl, Map as MapLibreMap, Popup, StyleSpecification} from 'maplibre-gl';
 import MapLibreDraw from 'maplibre-gl-draw';
-import {Feature, FeatureCollection, GeoJsonProperties, Geometry, Polygon} from 'geojson';
+import {Feature, FeatureCollection, GeoJsonProperties, Point, Polygon} from 'geojson';
 import {NgxMapLibreGLModule} from '@maplibre/ngx-maplibre-gl';
 import {centroid} from '@turf/turf';
-import {RequestService} from '../../services/request.service';
 import {take} from 'rxjs';
+import {BuildingService} from '../../services/building.service';
+import {Building} from '../../model/building.model';
 
 @Component({
   selector: 'app-map',
@@ -16,7 +17,7 @@ import {take} from 'rxjs';
   styleUrl: './campus-map.component.css',
 })
 export class CampusMapComponent implements OnInit{
-  private readonly requestService=inject(RequestService);
+  private readonly buildingService = inject(BuildingService);
 
   protected style!: StyleSpecification;
   protected pois: FeatureCollection = {
@@ -25,6 +26,8 @@ export class CampusMapComponent implements OnInit{
   };
   protected draw!: MapLibreDraw;
 
+  private map?: MapLibreMap;
+
   ngOnInit() {
     this.style = {
       version: 8,
@@ -32,31 +35,50 @@ export class CampusMapComponent implements OnInit{
       layers: [],
     };
 
-    this.requestService
-      //Send a get request to the json server to get the features
-      .get<Feature<Geometry, GeoJsonProperties>[]>('http://localhost:3000/buildings')
-      //Take the 1st response
-      .pipe(take(1))
-      //We subscribe
-      .subscribe((features) => {
-        //Set the text color to blue
-        features.forEach((feature) => {
-          if (feature.properties == null) {
-            feature.properties = {};
-          }
-          feature.properties['color'] = 'blue';
-        });
-
-        this.pois = {
-          type: 'FeatureCollection',
-          features
-        };
-      });
+    this.loadBuildings();
   }
 
   onMapLoad(map: MapLibreMap) {
+    this.map = map;
+
     this.addDraw(map);
     this.addPopups(map);
+  }
+
+  private loadBuildings() {
+    this.buildingService.getBuildings()
+      .pipe(take(1))
+      .subscribe({
+        next: buildings => {
+          this.pois = this.mapBuildingsToFeatureCollection(buildings);
+        },
+        error: err => {
+          console.error('Failed to load buildings for map:', err);
+        }
+      });
+  }
+
+  private mapBuildingsToFeatureCollection(
+    buildings: Building[]
+  ): FeatureCollection<Point, GeoJsonProperties> {
+    //Map the buildings to a GeoJSON FeatureCollection
+    return {
+      type: 'FeatureCollection',
+      features: buildings.map(building => ({
+        type: 'Feature',
+        id: building.id,
+        properties: {
+          name: building.name,
+          category: building.category,
+          description: building.description,
+          color: 'blue'
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: building.coordinates
+        }
+      }))
+    };
   }
 
   addDraw(map: MapLibreMap) {
@@ -107,6 +129,5 @@ export class CampusMapComponent implements OnInit{
       map.getCanvas().style.cursor = '';
       popup.remove();
     });
-
   }
 }
