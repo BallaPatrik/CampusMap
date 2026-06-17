@@ -1,0 +1,11 @@
+import {Position} from 'geojson';
+
+export interface BuildingPolygon {
+  id?: string;
+  name: string;
+  category: string;
+  description: string;
+  coordinates: Position[][];
+  userId?: number;
+}
+

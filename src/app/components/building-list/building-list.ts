@@ -4,11 +4,12 @@ import {MatIcon} from '@angular/material/icon';
 import {Router} from '@angular/router';
 import {MessageService} from '../../services/message.service';
 import {BuildingService} from '../../services/building.service';
-import {Building} from '../../model/building.model';
+import {BuildingPoint} from '../../model/building.point.model';
 import {BuildingCard} from '../building-card/building-card';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {BuildingSearchPipe} from '../../pipes/building.search.pipe';
 import {forkJoin, take} from 'rxjs';
+import {BuildingPolygon} from '../../model/building.polygon.model';
 
 @Component({
   selector: 'app-building-list',
@@ -28,7 +29,12 @@ export class BuildingList implements OnInit {
   private readonly messageService = inject(MessageService);
   private readonly buildingService = inject(BuildingService);
 
-  allBuildings = signal<Building[]>([]);
+  allBuildingsPoint = signal<BuildingPoint[]>([]);
+  allBuildingsPolygon = signal<BuildingPolygon[]>([]);
+  allBuildings = computed(() => [
+    ...this.allBuildingsPoint(),
+    ...this.allBuildingsPolygon()
+  ]);
 
   ngOnInit() {
     this.getAllBuildings();
@@ -83,12 +89,20 @@ export class BuildingList implements OnInit {
   }
 
   getAllBuildings() {
-    this.buildingService.getBuildings().subscribe({
+    this.buildingService.getBuildingsPoint().subscribe({
       next: buildings => {
-        this.allBuildings.set(buildings);
+        this.allBuildingsPoint.set(buildings);
       },
       error: err => {
-        console.error('Failed to load buildings:', err);
+        console.error('Failed to load point buildings:', err);
+      }
+    });
+    this.buildingService.getBuildingsPolygon().subscribe({
+      next: buildings => {
+        this.allBuildingsPolygon.set(buildings);
+      },
+      error: err => {
+        console.error('Failed to load polygon buildings:', err);
       }
     });
   }

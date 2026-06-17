@@ -1,9 +1,11 @@
-export interface Building {
+import {Position} from 'geojson';
+
+export interface BuildingPoint {
   id?: string;
   name: string;
   category: string;
   description: string;
-  coordinates: [number, number];
+  coordinates: Position;
   userId?: number;
 }
 

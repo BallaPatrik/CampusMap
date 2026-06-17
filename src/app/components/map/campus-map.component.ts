@@ -1,12 +1,13 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {IControl, Map as MapLibreMap, Popup, StyleSpecification} from 'maplibre-gl';
 import MapLibreDraw from 'maplibre-gl-draw';
-import {Feature, FeatureCollection, GeoJsonProperties, Point, Polygon} from 'geojson';
+import {Feature, FeatureCollection, GeoJsonProperties, Geometry, Polygon, Position} from 'geojson';
 import {NgxMapLibreGLModule} from '@maplibre/ngx-maplibre-gl';
 import {centroid} from '@turf/turf';
 import {take} from 'rxjs';
 import {BuildingService} from '../../services/building.service';
-import {Building} from '../../model/building.model';
+import {BuildingPoint} from '../../model/building.point.model';
+import {BuildingPolygon} from '../../model/building.polygon.model';
 
 @Component({
   selector: 'app-map',
@@ -45,6 +46,10 @@ export class CampusMapComponent implements OnInit{
     this.addPopups(map);
   }
 
+  isPolygon(coords: Position | Position[][]): coords is Position[][] {
+    return Array.isArray(coords) && Array.isArray(coords[0]);
+  }
+
   private loadBuildings() {
     this.buildingService.getBuildings()
       .pipe(take(1))
@@ -59,25 +64,33 @@ export class CampusMapComponent implements OnInit{
   }
 
   private mapBuildingsToFeatureCollection(
-    buildings: Building[]
-  ): FeatureCollection<Point, GeoJsonProperties> {
-    //Map the buildings to a GeoJSON FeatureCollection
+    buildings: (BuildingPoint | BuildingPolygon)[]
+  ): FeatureCollection<Geometry, GeoJsonProperties> {
     return {
       type: 'FeatureCollection',
-      features: buildings.map(building => ({
-        type: 'Feature',
-        id: building.id,
-        properties: {
-          name: building.name,
-          category: building.category,
-          description: building.description,
-          color: 'blue'
-        },
-        geometry: {
-          type: 'Point',
-          coordinates: building.coordinates
-        }
-      }))
+      features: buildings.map(building => {
+        const geometry = this.isPolygon(building.coordinates)
+          ? {
+            type: 'Polygon' as const,
+            coordinates: building.coordinates
+          }
+          : {
+            type: 'Point' as const,
+            coordinates: building.coordinates
+          };
+
+        return {
+          type: 'Feature',
+          id: building.id,
+          properties: {
+            name: building.name,
+            category: building.category,
+            description: building.description,
+            color: 'blue'
+          },
+          geometry
+        };
+      })
     };
   }
 

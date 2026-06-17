@@ -16,6 +16,19 @@
   justify-content: center;
 }
 
+.map-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+mgl-map {
+  height: 80%;
+  width: 80%;
+}
+
 .error-message {
   text-align: center;
   margin-top: 20px

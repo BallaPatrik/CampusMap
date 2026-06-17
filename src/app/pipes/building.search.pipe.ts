@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import {Building} from '../model/building.model';
+import {BuildingPoint} from '../model/building.point.model';
 
 
 //pipes are used to modify data, we can use it in template with | operator plus we can also inject it and use it in code
@@ -8,7 +8,7 @@ import {Building} from '../model/building.model';
   name: 'buildingSearch',
 })
 export class BuildingSearchPipe implements PipeTransform {
-  transform(buildings: Building[], searchString: string | null): Building[] {
+  transform(buildings: BuildingPoint[], searchString: string | null): BuildingPoint[] {
     if (!searchString || searchString.length === 0) return buildings;
 
     return buildings.filter(

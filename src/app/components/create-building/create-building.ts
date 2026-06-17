@@ -1,12 +1,17 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatButton} from "@angular/material/button";
 import {MatError, MatFormField, MatInput, MatLabel} from "@angular/material/input";
 import {Router} from '@angular/router';
 import {MessageService} from '../../services/message.service';
 import {form, FormField, minLength, required} from '@angular/forms/signals';
-import {Building} from '../../model/building.model';
+import {BuildingPoint} from '../../model/building.point.model';
 import {BuildingService} from '../../services/building.service';
+import {LayerComponent, MapComponent, RasterSourceComponent} from '@maplibre/ngx-maplibre-gl';
+import {IControl, Map as MapLibreMap, StyleSpecification} from 'maplibre-gl';
+import MapLibreDraw from 'maplibre-gl-draw';
+import {Feature, Polygon} from 'geojson';
+import {BuildingPolygon} from '../../model/building.polygon.model';
 
 @Component({
   selector: 'app-create-building',
@@ -18,19 +23,62 @@ import {BuildingService} from '../../services/building.service';
     MatInput,
     MatLabel,
     ReactiveFormsModule,
-    FormField
+    FormField,
+    LayerComponent,
+    MapComponent,
+    RasterSourceComponent
   ],
   templateUrl: './create-building.html',
   styleUrl: './create-building.css',
 })
-export class CreateBuilding {
+export class CreateBuilding implements OnInit {
   private readonly router = inject(Router);
   private readonly buildingService = inject(BuildingService);
   private readonly messageService = inject(MessageService);
 
+  protected style!: StyleSpecification;
+  protected draw!: MapLibreDraw;
+  private map?: MapLibreMap;
+
+  ngOnInit() {
+    this.style = {
+      version: 8,
+      sources: {},
+      layers: [],
+    };
+  }
+
+  onMapLoad(map: MapLibreMap) {
+    this.map = map;
+
+    this.addDraw(map);
+  }
+
+  addDraw(map: MapLibreMap) {
+    this.draw = new MapLibreDraw({
+      controls: {
+        polygon: true,
+        trash: true,
+      },
+    });
+
+    map.addControl(this.draw as unknown as IControl);
+
+    map.on('draw.create', (e) => this.onDrawEvent(e));
+  }
+
+  onDrawEvent(e: { features: Feature<Polygon>[]; type: string }) {
+    const coordinates = e.features[0].geometry.coordinates;
+    this.buildingPolygonModel.update(building => ({
+      ...building,
+      coordinates
+    }));
+    console.log(this.buildingPolygonModel());
+  }
+
   onCreate() {
-    const building: Building = {
-      ...this.buildingModel()
+    const building = {
+      ...this.buildingPointModel()
     };
 
     //Create the building
@@ -52,16 +100,23 @@ export class CreateBuilding {
   }
 
   //we specify the form model and the initial state as a signal
-  buildingModel = signal<Building>({
+  buildingPointModel = signal<BuildingPoint>({
     name: '',
     category: '',
     description: '',
-    coordinates: [17.9, 47]
+    coordinates: []
+  });
+
+  buildingPolygonModel = signal<BuildingPolygon>({
+    name: '',
+    category: '',
+    description: '',
+    coordinates: []
   });
 
 
   //calling the new form() function creates a signal form based on the model and the declared schemaPath configuration
-  createBuildingForm = form(this.buildingModel, (schemaPath) => {
+  createBuildingForm = form(this.buildingPointModel, (schemaPath) => {
     //there are builtin validators like required, minLength, pattern etc.
     required(schemaPath.name);
     required(schemaPath.category);

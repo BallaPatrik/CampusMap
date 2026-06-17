@@ -55,4 +55,23 @@
     }
   </div>
 
+  <div class="map-container">
+    <mgl-map
+      [mapStyle]="style"
+      [zoom]="[13]"
+      [maxZoom]="19"
+      [center]="[17.908950535135272, 47.088969173638375]"
+      (mapLoad)="onMapLoad($event)"
+    >
+      <mgl-raster-source
+        id="base-source"
+        attribution="© OpenStreetMap contributors"
+        [tileSize]="256"
+        [tiles]="['https://tile.openstreetmap.org/{z}/{x}/{y}.png']"
+      />
+      <mgl-layer id="base-layer" type="raster" source="base-source"/>
+
+    </mgl-map>
+  </div>
+
 </form>

@@ -1,5 +1,5 @@
 import {Component, input, output} from '@angular/core';
-import {Building} from '../../model/building.model';
+import {BuildingPoint} from '../../model/building.point.model';
 import {MatCard, MatCardContent, MatCardHeader, MatCardTitle} from '@angular/material/card';
 import {MatCheckbox} from '@angular/material/checkbox';
 
@@ -16,7 +16,7 @@ import {MatCheckbox} from '@angular/material/checkbox';
   styleUrl: './building-card.css',
 })
 export class BuildingCard {
-  readonly building = input.required<Building>();
+  readonly building = input.required<BuildingPoint>();
 
   selectAction = output<string>();
 
