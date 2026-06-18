@@ -10,7 +10,7 @@ import {BuildingService} from '../../services/building.service';
 import {LayerComponent, MapComponent, RasterSourceComponent} from '@maplibre/ngx-maplibre-gl';
 import {IControl, Map as MapLibreMap, StyleSpecification} from 'maplibre-gl';
 import MapLibreDraw from 'maplibre-gl-draw';
-import {Feature, Polygon} from 'geojson';
+import {Feature, Polygon, Position} from 'geojson';
 import {BuildingPolygon} from '../../model/building.polygon.model';
 
 @Component({
@@ -40,6 +40,8 @@ export class CreateBuilding implements OnInit {
   protected draw!: MapLibreDraw;
   private map?: MapLibreMap;
 
+  protected selectedBuildingCoordinates = signal(<Position[][]>[[]]);
+
   ngOnInit() {
     this.style = {
       version: 8,
@@ -52,6 +54,8 @@ export class CreateBuilding implements OnInit {
     this.map = map;
 
     this.addDraw(map);
+
+    this.clearEveryDrawing();
   }
 
   addDraw(map: MapLibreMap) {
@@ -67,19 +71,75 @@ export class CreateBuilding implements OnInit {
     map.on('draw.create', (e) => this.onDrawEvent(e));
   }
 
+  clearDrawing() {
+
+    //We want to clear every drawing if it exceeds one (multiple areas can't be added to a single building)
+    //Get the number of drawings
+    const count = this.draw.getAll().features.length;
+
+    //If it's 1, we don't want to clear it
+    if (count == 1) {
+      return;
+    }
+
+    //Else we want to clear it and send an error message
+    this.messageService.SendErrorMessageSnackbar("You can only draw one building at a time!", "X");
+
+    this.clearEveryDrawing();
+  }
+
+  clearEveryDrawing() {
+    //Delete all drawings
+    this.draw.deleteAll();
+
+    //Reset the selected building coordinates
+    this.selectedBuildingCoordinates.set([]);
+
+    //Update the model with cleared coordinates
+    this.buildingPolygonModel.update(b => ({
+      ...b,
+      coordinates: []
+    }));
+  }
+
   onDrawEvent(e: { features: Feature<Polygon>[]; type: string }) {
+    //Clear the drawings if there are more than 1 drawings
+    this.clearDrawing();
+
     const coordinates = e.features[0].geometry.coordinates;
+    this.selectedBuildingCoordinates.set(coordinates);
     this.buildingPolygonModel.update(building => ({
       ...building,
       coordinates
     }));
-    console.log(this.buildingPolygonModel());
   }
 
   onCreate() {
+
+    //Get the form values
+    const name = this.createBuildingForm.name().value();
+    const category = this.createBuildingForm.category().value();
+    const description = this.createBuildingForm.description().value();
+
+    //Send error message if there is no drawing present
+    if (this.selectedBuildingCoordinates().length == 0) {
+      this.messageService.SendErrorMessageSnackbar("You must draw a building first!", "X");
+      return;
+    }
+
+    //Update the signal with the form's values
+    this.buildingPolygonModel.update(building => ({
+      ...building,
+      name,
+      category,
+      description
+    }));
+
+
     const building = {
-      ...this.buildingPointModel()
+      ...this.buildingPolygonModel()
     };
+
 
     //Create the building
     this.buildingService.createBuilding(building)
@@ -87,9 +147,7 @@ export class CreateBuilding implements OnInit {
         //After we successfully create the building, we send a message and navigate to the map page
         next: createdBuilding => {
           this.messageService.SendSuccessMessageSnackbar(
-            'Successfully created building: ' + createdBuilding.name + '!',
-            'X'
-          );
+            'Successfully created building: ' + createdBuilding.name + '!', 'X');
 
           this.router.navigateByUrl('/api/map');
         },
@@ -111,7 +169,7 @@ export class CreateBuilding implements OnInit {
     name: '',
     category: '',
     description: '',
-    coordinates: []
+    coordinates: [[]]
   });
 
 
@@ -121,10 +179,6 @@ export class CreateBuilding implements OnInit {
     required(schemaPath.name);
     required(schemaPath.category);
     required(schemaPath.description);
-
-
-    //required(schemaPath.coordinates);
-
 
     //we can define are own reusable validators too
     //recipeCodeValidator(schemaPath.recipeCode);

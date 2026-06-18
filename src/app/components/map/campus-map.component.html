@@ -9,15 +9,55 @@
   >
     <mgl-raster-source
       id="base-source"
-      attribution="© OpenStreetMap contributors"
+      attribution="(c) OpenStreetMap contributors"
       [tileSize]="256"
       [tiles]="['https://tile.openstreetmap.org/{z}/{x}/{y}.png']"
     />
     <mgl-layer id="base-layer" type="raster" source="base-source" />
 
     <mgl-geojson-source id="pois-source" [data]="pois" />
+
+    <!-- Polygon areas are rendered with a fill layer. -->
     <mgl-layer
-      id="pois-layer"
+      id="pois-polygon-fill-layer"
+      type="fill"
+      source="pois-source"
+      [filter]="['==', ['geometry-type'], 'Polygon']"
+      [paint]="{
+        'fill-color': '#2563eb',
+        'fill-opacity': 0.28
+      }"
+    />
+
+    <!-- Polygon borders are rendered separately so the building outline stays visible. -->
+    <mgl-layer
+      id="pois-polygon-outline-layer"
+      type="line"
+      source="pois-source"
+      [filter]="['==', ['geometry-type'], 'Polygon']"
+      [paint]="{
+        'line-color': '#1d4ed8',
+        'line-width': 2
+      }"
+    />
+
+    <!-- Point buildings are rendered as clickable circles. -->
+    <mgl-layer
+      id="pois-point-layer"
+      type="circle"
+      source="pois-source"
+      [filter]="['==', ['geometry-type'], 'Point']"
+      [paint]="{
+        'circle-color': '#2563eb',
+        'circle-radius': 7,
+        'circle-stroke-color': '#ffffff',
+        'circle-stroke-width': 2
+      }"
+    />
+
+    <!-- Labels work for both Points and Polygons because they use the same GeoJSON source. -->
+    <mgl-layer
+      id="pois-label-layer"
       type="symbol"
       source="pois-source"
       [layout]="{

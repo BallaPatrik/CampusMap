@@ -110,9 +110,9 @@ export class BuildingService {
     );
   }
 
-  createBuilding(building: BuildingPoint) {
+  createBuilding(building: BuildingPolygon) {
     //Construct the building feature without the id (omit)
-    const buildingPointFeature: Omit<BuildingPointFeature, 'id'> = {
+    const buildingPolygonFeature: Omit<BuildingPolygonFeature, 'id'> = {
       type: 'Feature',
       properties: {
         name: building.name,
@@ -120,13 +120,13 @@ export class BuildingService {
         description: building.description
       },
       geometry: {
-        type: 'Point',
-        coordinates: building.coordinates as Position
+        type: 'Polygon',
+        coordinates: building.coordinates as Position[][]
       }
     };
 
     //Send a POST request to the server with the building feature
-    return this.requestService.post<BuildingPointFeature>(BUILDING_URL, buildingPointFeature).pipe(
+    return this.requestService.post<BuildingPolygonFeature>(BUILDING_URL, buildingPolygonFeature).pipe(
       //Map because we only need parts of the response
       map(feature => ({
         id: feature.id,

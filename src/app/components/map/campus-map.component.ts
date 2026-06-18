@@ -46,16 +46,13 @@ export class CampusMapComponent implements OnInit{
     this.addPopups(map);
   }
 
-  isPolygon(coords: Position | Position[][]): coords is Position[][] {
-    return Array.isArray(coords) && Array.isArray(coords[0]);
-  }
-
   private loadBuildings() {
     this.buildingService.getBuildings()
       .pipe(take(1))
       .subscribe({
         next: buildings => {
           this.pois = this.mapBuildingsToFeatureCollection(buildings);
+          console.log(this.pois);
         },
         error: err => {
           console.error('Failed to load buildings for map:', err);
@@ -65,33 +62,113 @@ export class CampusMapComponent implements OnInit{
 
   private mapBuildingsToFeatureCollection(
     buildings: (BuildingPoint | BuildingPolygon)[]
-  ): FeatureCollection<Geometry, GeoJsonProperties> {
+  ): FeatureCollection {
     return {
       type: 'FeatureCollection',
-      features: buildings.map(building => {
-        const geometry = this.isPolygon(building.coordinates)
-          ? {
-            type: 'Polygon' as const,
-            coordinates: building.coordinates
-          }
-          : {
-            type: 'Point' as const,
-            coordinates: building.coordinates
-          };
-
-        return {
-          type: 'Feature',
-          id: building.id,
-          properties: {
-            name: building.name,
-            category: building.category,
-            description: building.description,
-            color: 'blue'
-          },
-          geometry
-        };
-      })
+      // Convert every building model into a GeoJSON feature that MapLibre can render.
+      // Invalid geometries are skipped so one bad database record does not break the map.
+      features: buildings
+        //Map the features to a format that MapLibre can understand
+        .map(building => this.mapBuildingToFeature(building))
+        //Filter out every feature where the feature is NOT null
+        .filter((feature): feature is Feature<Geometry, GeoJsonProperties> => feature !== null)
     };
+  }
+
+  private mapBuildingToFeature(
+    building: BuildingPoint | BuildingPolygon
+  ): Feature<Geometry, GeoJsonProperties> | null {
+
+    //Get the feature's geometry (Point or Polygon) and also it's coordinates
+    const geometry = this.mapBuildingGeometry(building.coordinates);
+
+    if (!geometry) {
+      console.warn(`Skipping building with invalid geometry: ${building.name}`);
+      return null;
+    }
+
+    //Return the feature with the geometry and the building's properties
+    return {
+      type: 'Feature',
+      id: building.id,
+      properties: {
+        name: building.name,
+        category: building.category,
+        description: building.description,
+        color: 'blue'
+      },
+      geometry
+    };
+  }
+
+  private mapBuildingGeometry(coords: Position | Position[][]): Geometry | null {
+    // A Point is stored as one coordinate pair: [lng, lat].
+    if (this.isPosition(coords)) {
+      return {
+        type: 'Point',
+        coordinates: coords
+      };
+    }
+
+    // A Polygon needs a list of rings. The normalizer also accepts older flat data
+    // shaped like [[lng, lat], ...] and wraps it into the official GeoJSON format.
+    const polygonCoordinates = this.normalizePolygonCoordinates(coords);
+
+    if (!polygonCoordinates) return null;
+
+    return {
+      type: 'Polygon',
+      coordinates: polygonCoordinates
+    };
+  }
+
+  private normalizePolygonCoordinates(coords: Position[][]): Position[][] | null {
+    //If it's not an array or the length is empty, then we return null
+    if (!Array.isArray(coords) || coords.length === 0) return null;
+
+    // Some saved polygons are one linear ring instead of an array of rings.
+    // MapLibre expects Polygon coordinates as [[[lng, lat], ...]].
+    //This is a ring, not a polygon, so we need to handle it differently.
+    if (this.isLinearRing(coords)) {
+      return [this.closeLinearRing(coords)];
+    }
+
+    // If the data is already ring-based, keep only valid rings.
+    const rings = coords
+      //Keep the valid rings.
+      .filter((ring): ring is Position[] => this.isLinearRing(ring))
+      //And close them if they need to be closed.
+      .map(ring => this.closeLinearRing(ring));
+
+    //If there is at least 1 ring, then we return it/them, otherwise return null
+    return rings.length > 0 ? rings : null;
+  }
+
+  private isPosition(coords: unknown): coords is Position {
+    // GeoJSON coordinates are longitude/latitude number pairs.
+    return Array.isArray(coords)
+      && typeof coords[0] === 'number'
+      && typeof coords[1] === 'number';
+  }
+
+  private isLinearRing(coords: unknown): coords is Position[] {
+    // A polygon ring must contain at least four positions, including the closing point.
+    return Array.isArray(coords)
+      && coords.length >= 4
+      && coords.every(coord => this.isPosition(coord));
+  }
+
+  private closeLinearRing(ring: Position[]): Position[] {
+    // GeoJSON requires the first and last coordinate of a polygon ring to be the same.
+
+    const first = ring[0];
+    const last = ring[ring.length - 1];
+
+    //If the first and last coords are the same, then we can return the ring unchanged
+    if (first[0] === last[0] && first[1] === last[1]) return ring;
+
+    //Otherwise make it a ring by inserting the first coord at the end
+    return [...ring, first];
   }
 
   addDraw(map: MapLibreMap) {
@@ -118,13 +195,16 @@ export class CampusMapComponent implements OnInit{
       className: 'popup',
     });
 
-    map.on('mouseenter', ['pois-layer'], (e) => {
+    // Popups are attached only to the visible clickable layers:
+    // point circles and polygon fills.
+    map.on('mouseenter', ['pois-point-layer', 'pois-polygon-fill-layer'], (e) => {
       map.getCanvas().style.cursor = 'pointer';
 
       if (!e.features || !e) return;
-      const feature = e.features[0] as Feature<Polygon>;
+      const feature = e.features[0] as Feature<Geometry>;
 
       if (!feature.properties) return;
+      // Turf centroid gives a stable popup position for both points and polygons.
       const center = centroid(feature).geometry.coordinates as [number, number];
       const title = feature.properties['name'];
       const category=feature.properties['category'];
@@ -138,7 +218,7 @@ export class CampusMapComponent implements OnInit{
         .addTo(map);
     });
 
-    map.on('mouseleave', ['pois-layer'], (e) => {
+    map.on('mouseleave', ['pois-point-layer', 'pois-polygon-fill-layer'], (e) => {
       map.getCanvas().style.cursor = '';
       popup.remove();
     });
