@@ -2,6 +2,7 @@ import {Component, input, output} from '@angular/core';
 import {BuildingPoint} from '../../model/building.point.model';
 import {MatCard, MatCardContent, MatCardHeader, MatCardTitle} from '@angular/material/card';
 import {MatCheckbox} from '@angular/material/checkbox';
+import {BuildingPolygon} from '../../model/building.polygon.model';
 
 @Component({
   selector: 'app-building-card',
@@ -16,7 +17,7 @@ import {MatCheckbox} from '@angular/material/checkbox';
   styleUrl: './building-card.css',
 })
 export class BuildingCard {
-  readonly building = input.required<BuildingPoint>();
+  readonly building = input.required<BuildingPoint | BuildingPolygon>();
 
   selectAction = output<string>();
 

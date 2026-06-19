@@ -52,7 +52,6 @@ export class CampusMapComponent implements OnInit{
       .subscribe({
         next: buildings => {
           this.pois = this.mapBuildingsToFeatureCollection(buildings);
-          console.log(this.pois);
         },
         error: err => {
           console.error('Failed to load buildings for map:', err);

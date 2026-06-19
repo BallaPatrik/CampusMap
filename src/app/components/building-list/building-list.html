@@ -36,7 +36,7 @@
 <!--$any is used to cast the value to any type-->
 
 <!--Template variable for filtered buildings-->
-@let filteredBuildings = allBuildingsPoint() | buildingSearch: searchString();
+@let filteredBuildings = allBuildings() | buildingSearch: searchString();
 
 <!--Trim: remove whitespace characters from the beginning and end of the string.-->
 @if (searchString().trim() && filteredBuildings.length === 0) {
@@ -44,7 +44,7 @@
 }
 
 <div class="building-grid">
-  @for (building of allBuildingsPoint() | buildingSearch: searchString(); track building.id) {
+  @for (building of allBuildings() | buildingSearch: searchString(); track building.id) {
     <app-building-card
       [building]="building" (selectAction)="onSelect($event)"
     />
