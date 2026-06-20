@@ -65,7 +65,7 @@ export class CampusMapComponent implements OnInit{
     return {
       type: 'FeatureCollection',
       // Convert every building model into a GeoJSON feature that MapLibre can render.
-      // Invalid geometries are skipped so one bad database record does not break the map.
+      // Invalid geometries are skipped, so one bad database record does not break the map.
       features: buildings
         //Map the features to a format that MapLibre can understand
         .map(building => this.mapBuildingToFeature(building))
@@ -184,7 +184,7 @@ export class CampusMapComponent implements OnInit{
   }
 
   onDrawEvent(e: { features: Feature<Polygon>[]; type: string }) {
-    console.log(e);
+    //console.log(e);
   }
 
   addPopups(map: MapLibreMap) {

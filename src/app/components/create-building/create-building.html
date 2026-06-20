@@ -27,10 +27,12 @@
     </mat-form-field>
 
   </div>
-
+  @if (createBuildingForm.name().valid() && createBuildingForm.category().valid() &&
+  createBuildingForm.description().valid() && createBuildingForm.coordinates().valid()) {
   <div class="button-container">
     <button type="submit" form="create-building-form" mat-raised-button>Create building</button>
   </div>
+  }
 
   <div class="error-message">
     @if (createBuildingForm.name().invalid()) {
@@ -53,6 +55,11 @@
         {{ getCoordinatesErrorMessage() }}
       </mat-error>
     }
+  </div>
+
+  <div class="map-button-container">
+    <button type="button" mat-raised-button (click)="undo()">Undo</button>
+    <button type="button" mat-raised-button (click)="redo()">Redo</button>
   </div>
 
   <div class="map-container">
