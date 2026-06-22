@@ -12,6 +12,7 @@ import {IControl, Map as MapLibreMap, StyleSpecification} from 'maplibre-gl';
 import MapLibreDraw from 'maplibre-gl-draw';
 import {Feature, FeatureCollection, Polygon, Position} from 'geojson';
 import {BuildingPolygon} from '../../model/building.polygon.model';
+import {polygonCoordinatesValidator} from '../../validators/polygon-coordinates-validator';
 
 type ActiveDrawState =
   | { kind: 'polygon'; state: any }
@@ -123,7 +124,7 @@ export class CreateBuilding implements OnInit {
   }
 
   onDrawEvent(e: { features: Feature<Polygon>[]; type: string }) {
-    //Clear the drawings if there are more than 1 drawing(s)
+    // Clear the drawings if there are more than 1 drawing(s)
     this.clearDrawing();
 
     //Get the coordinates
@@ -477,14 +478,13 @@ export class CreateBuilding implements OnInit {
 
 
   //calling the new form() function creates a signal form based on the model and the declared schemaPath configuration
-  createBuildingForm = form(this.buildingPointModel, (schemaPath) => {
+  createBuildingForm = form(this.buildingPolygonModel, (schemaPath) => {
     //there are builtin validators like required, minLength, pattern etc.
     required(schemaPath.name);
     required(schemaPath.category);
     required(schemaPath.description);
+    polygonCoordinatesValidator(schemaPath.coordinates);
 
-    //we can define are own reusable validators too
-    //recipeCodeValidator(schemaPath.recipeCode);
     minLength(schemaPath.name, 4);
     minLength(schemaPath.category, 4);
     minLength(schemaPath.description, 10);
@@ -544,19 +544,16 @@ export class CreateBuilding implements OnInit {
   }
 
   getCoordinatesErrorMessage() {
-    const password = this.createBuildingForm.category();
+    const errors = this.createBuildingForm.coordinates().errors();
 
-    if (password.dirty() || password.touched()) {
-      const errors = password.errors();
+    const polygonError = errors.find(
+      error => error.kind === 'polygonCoords'
+    );
 
-      if (errors.some(error => error.kind === 'required')) {
-        return 'You must enter a value for coordinates!';
-      }
-
-      if (errors.some(error => error.kind === 'minLength')) {
-        return 'You must enter at least 4 characters for coordinates!';
-      }
+    if (polygonError?.message !== undefined) {
+      return polygonError.message;
     }
+
     return '';
   }
 }
