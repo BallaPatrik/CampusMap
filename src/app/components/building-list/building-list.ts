@@ -88,6 +88,11 @@ export class BuildingList implements OnInit {
     this.selectedBuildingIds.set([]);
   }
 
+  onEdit() {
+    let selectedBuildingIds = this.selectedBuildingIds();
+    this.router.navigateByUrl('/api/building/edit/' + selectedBuildingIds[0]);
+  }
+
   getAllBuildings() {
     this.buildingService.getBuildingsPoint().subscribe({
       next: buildings => {

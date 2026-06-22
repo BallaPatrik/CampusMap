@@ -1,0 +1,84 @@
+<!--  We need to prevent page reload on form submit so we use (ngSubmit) instead of (submit)-->
+<form
+  class="edit-building-form"
+  id="edit-building-form"
+  (ngSubmit)="onEdit()"
+>
+  <h1 class="page-title">Edit building</h1>
+
+  <div class="input-container">
+
+    <mat-form-field appearance="outline" class="flex-item">
+      <mat-label>Name</mat-label>
+      <!-- We bind form fields to template code using the [formField] attribute -->
+      <input matInput placeholder="Name" [formField]="editBuildingForm.name"/>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="flex-item">
+      <mat-label>Category</mat-label>
+      <!-- We bind form fields to template code using the [formField] attribute -->
+      <input matInput placeholder="Category" [formField]="editBuildingForm.category"/>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="flex-item">
+      <mat-label>Description</mat-label>
+      <!-- We bind form fields to template code using the [formField] attribute -->
+      <input matInput placeholder="Description" [formField]="editBuildingForm.description"/>
+    </mat-form-field>
+
+  </div>
+  @if (editBuildingForm.name().valid() && editBuildingForm.category().valid() &&
+  editBuildingForm.description().valid() && editBuildingForm.coordinates().valid()) {
+    <div class="button-container">
+      <button type="submit" form="create-building-form" mat-raised-button>Create building</button>
+    </div>
+  }
+
+  <div class="error-message">
+    @if (editBuildingForm.name().invalid()) {
+      <mat-error>
+        {{ getNameErrorMessage() }}
+      </mat-error>
+    }
+    @if (editBuildingForm.category().invalid()) {
+      <mat-error>
+        {{ getCategoryErrorMessage() }}
+      </mat-error>
+    }
+    @if (editBuildingForm.description().invalid()) {
+      <mat-error>
+        {{ getDescriptionErrorMessage() }}
+      </mat-error>
+    }
+    @if (editBuildingForm.coordinates().invalid()) {
+      <mat-error>
+        {{ getCoordinatesErrorMessage() }}
+      </mat-error>
+    }
+  </div>
+
+  <div class="map-button-container">
+    <button type="button" mat-raised-button (click)="undo()">Undo</button>
+    <button type="button" mat-raised-button (click)="redo()">Redo</button>
+  </div>
+
+  <div class="map-container">
+    <mgl-map
+      [mapStyle]="style"
+      [zoom]="[13]"
+      [maxZoom]="19"
+      [center]="[17.908950535135272, 47.088969173638375]"
+      (mapLoad)="onMapLoad($event)"
+    >
+      <mgl-raster-source
+        id="base-source"
+        attribution="© OpenStreetMap contributors"
+        [tileSize]="256"
+        [tiles]="['https://tile.openstreetmap.org/{z}/{x}/{y}.png']"
+      />
+      <mgl-layer id="base-layer" type="raster" source="base-source"/>
+
+    </mgl-map>
+  </div>
+
+</form>

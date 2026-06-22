@@ -5,6 +5,7 @@ import {BuildingList} from './components/building-list/building-list';
 import {AuthGuard} from './guards/auth-guard';
 import {GuestGuard} from './guards/guest-guard';
 import {CreateBuilding} from './components/create-building/create-building';
+import {EditBuilding} from './components/edit-building/edit-building';
 
 export const routes: Routes = [
   {
@@ -30,6 +31,11 @@ export const routes: Routes = [
   {
     path: 'api/building/create',
     component: CreateBuilding,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'api/building/edit/:id',
+    component: EditBuilding,
     canActivate: [AuthGuard]
   },
   {

@@ -1,16 +1,16 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {LayerComponent, MapComponent, RasterSourceComponent} from "@maplibre/ngx-maplibre-gl";
 import {MatButton} from "@angular/material/button";
 import {MatError, MatFormField, MatInput, MatLabel} from "@angular/material/input";
-import {Router} from '@angular/router';
-import {MessageService} from '../../services/message.service';
-import {form, FormField, minLength, required} from '@angular/forms/signals';
+import {ActivatedRoute, Router} from '@angular/router';
 import {BuildingService} from '../../services/building.service';
-import {LayerComponent, MapComponent, RasterSourceComponent} from '@maplibre/ngx-maplibre-gl';
+import {MessageService} from '../../services/message.service';
 import {IControl, Map as MapLibreMap, StyleSpecification} from 'maplibre-gl';
 import MapLibreDraw from 'maplibre-gl-draw';
 import {Feature, FeatureCollection, Polygon, Position} from 'geojson';
 import {BuildingPolygon} from '../../model/building.polygon.model';
+import {form, FormField, minLength, required} from '@angular/forms/signals';
 import {polygonCoordinatesValidator} from '../../validators/polygon-coordinates-validator';
 
 type ActiveDrawState =
@@ -18,25 +18,26 @@ type ActiveDrawState =
   | { kind: 'line'; state: any };
 
 @Component({
-  selector: 'app-create-building',
+  selector: 'app-edit-building',
   imports: [
     FormsModule,
+    LayerComponent,
+    MapComponent,
     MatButton,
     MatError,
     MatFormField,
     MatInput,
     MatLabel,
+    RasterSourceComponent,
     ReactiveFormsModule,
-    FormField,
-    LayerComponent,
-    MapComponent,
-    RasterSourceComponent
+    FormField
   ],
-  templateUrl: './create-building.html',
-  styleUrl: './create-building.css',
+  templateUrl: './edit-building.html',
+  styleUrl: './edit-building.css',
 })
-export class CreateBuilding implements OnInit {
+export class EditBuilding {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly buildingService = inject(BuildingService);
   private readonly messageService = inject(MessageService);
 
@@ -58,6 +59,10 @@ export class CreateBuilding implements OnInit {
       sources: {},
       layers: [],
     };
+
+    const id = this.route.snapshot.paramMap.get('id');
+
+    this.getInitialData(id!);
   }
 
   onMapLoad(map: MapLibreMap) {
@@ -66,6 +71,15 @@ export class CreateBuilding implements OnInit {
     this.addDraw(map);
 
     this.clearEveryDrawing();
+  }
+
+  getInitialData(id: string) {
+    const building = this.buildingService.getBuildingById(id).subscribe(building => {
+      console.log(building);
+    });
+
+
+    //INNEN KELL FOLYTATNI
   }
 
   addDraw(map: MapLibreMap) {
@@ -417,12 +431,12 @@ export class CreateBuilding implements OnInit {
     });
   }
 
-  onCreate() {
+  onEdit() {
 
     //Get the form values
-    const name = this.createBuildingForm.name().value();
-    const category = this.createBuildingForm.category().value();
-    const description = this.createBuildingForm.description().value();
+    const name = this.editBuildingForm.name().value();
+    const category = this.editBuildingForm.category().value();
+    const description = this.editBuildingForm.description().value();
 
     //Send error message if there is no drawing present
     if (this.selectedBuildingCoordinates().length == 0) {
@@ -444,13 +458,13 @@ export class CreateBuilding implements OnInit {
     };
 
 
-    //Create the building
-    this.buildingService.createBuilding(building)
+    //Update the building
+    this.buildingService.editBuilding(building)
       .subscribe({
         //After we successfully create the building, we send a message and navigate to the map page
-        next: createdBuilding => {
+        next: updatedBuilding => {
           this.messageService.SendSuccessMessageSnackbar(
-            'Successfully created building: ' + createdBuilding.name + '!', 'X');
+            'Successfully created building: ' + updatedBuilding.name + '!', 'X');
 
           this.router.navigateByUrl('/api/map');
         },
@@ -469,7 +483,7 @@ export class CreateBuilding implements OnInit {
 
 
   //calling the new form() function creates a signal form based on the model and the declared schemaPath configuration
-  createBuildingForm = form(this.buildingPolygonModel, (schemaPath) => {
+  editBuildingForm = form(this.buildingPolygonModel, (schemaPath) => {
     //there are builtin validators like required, minLength, pattern etc.
     required(schemaPath.name);
     required(schemaPath.category);
@@ -484,7 +498,7 @@ export class CreateBuilding implements OnInit {
   });
 
   getNameErrorMessage() {
-    const name = this.createBuildingForm.name();
+    const name = this.editBuildingForm.name();
 
     if (name.dirty() || name.touched()) {
       const errors = name.errors();
@@ -501,7 +515,7 @@ export class CreateBuilding implements OnInit {
   }
 
   getCategoryErrorMessage() {
-    const category = this.createBuildingForm.category();
+    const category = this.editBuildingForm.category();
 
     if (category.dirty() || category.touched()) {
       const errors = category.errors();
@@ -518,7 +532,7 @@ export class CreateBuilding implements OnInit {
   }
 
   getDescriptionErrorMessage() {
-    const description = this.createBuildingForm.description();
+    const description = this.editBuildingForm.description();
 
     if (description.dirty() || description.touched()) {
       const errors = description.errors();
@@ -535,7 +549,7 @@ export class CreateBuilding implements OnInit {
   }
 
   getCoordinatesErrorMessage() {
-    const errors = this.createBuildingForm.coordinates().errors();
+    const errors = this.editBuildingForm.coordinates().errors();
 
     const polygonError = errors.find(
       error => error.kind === 'polygonCoords'

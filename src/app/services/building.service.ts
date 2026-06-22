@@ -138,6 +138,34 @@ export class BuildingService {
     );
   }
 
+  editBuilding(building: BuildingPolygon) {
+    //Construct the building feature without the id (omit)
+    const buildingPolygonFeature: Omit<BuildingPolygonFeature, 'id'> = {
+      type: 'Feature',
+      properties: {
+        name: building.name,
+        category: building.category,
+        description: building.description
+      },
+      geometry: {
+        type: 'Polygon',
+        coordinates: building.coordinates as Position[][]
+      }
+    };
+
+    //Send a POST request to the server with the building feature
+    return this.requestService.put<BuildingPolygonFeature>(BUILDING_URL, buildingPolygonFeature).pipe(
+      //Map because we only need parts of the response
+      map(feature => ({
+        id: feature.id,
+        name: feature.properties.name,
+        category: feature.properties.category,
+        description: feature.properties.description,
+        coordinates: feature.geometry.coordinates
+      }))
+    );
+  }
+
   deleteBuildingById(buildingId: string) {
     return this.requestService.delete<BuildingPoint>(`${BUILDING_URL}/${buildingId}`);
   }

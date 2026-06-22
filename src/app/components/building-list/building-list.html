@@ -13,7 +13,7 @@
     </button>
   }
   @if (this.selectedBuildingCount() == 1) {
-    <button matFab extended>
+    <button matFab extended (click)="onEdit()">
       <mat-icon>edit</mat-icon>
       Edit selected building
     </button>
