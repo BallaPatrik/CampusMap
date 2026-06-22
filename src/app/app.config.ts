@@ -3,6 +3,7 @@ import {provideRouter} from '@angular/router';
 import {routes} from './app.routes';
 import {provideHttpClient, withInterceptors} from '@angular/common/http';
 import {authInterceptor} from './interceptors/auth-interceptor';
+import {loadingInterceptor} from './interceptors/loading-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -11,7 +12,9 @@ export const appConfig: ApplicationConfig = {
     //This is a performance optimization that reduces the number of change detection cycles.
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor]))
-    //provideHttpClient(withInterceptors([authInterceptor, loggingInterceptor]))
+    provideHttpClient(withInterceptors([
+      authInterceptor, loadingInterceptor
+    ]))
+    //provideHttpClient(withInterceptors([authInterceptor, loadingInterceptor, loggingInterceptor]))
   ]
 };

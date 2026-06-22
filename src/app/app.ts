@@ -1,5 +1,5 @@
 import {Component, inject, OnInit} from '@angular/core';
-import { NgxMapLibreGLModule } from '@maplibre/ngx-maplibre-gl';
+import {NgxMapLibreGLModule} from '@maplibre/ngx-maplibre-gl';
 import {Router, RouterLink, RouterOutlet} from '@angular/router';
 import {LocalStorageKeys} from './constants/local-storage-keys';
 import {MatIcon} from '@angular/material/icon';
@@ -7,10 +7,11 @@ import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 import {IconService} from './services/icon.service';
 import {AuthService} from './services/auth.service';
+import {LoadingIndicator} from './components/loading-indicator/loading-indicator';
 
 @Component({
   selector: 'app-root',
-  imports: [NgxMapLibreGLModule, MatIcon, MatIconButton, MatMenuTrigger, MatMenu, MatMenuItem, RouterLink, MatButton, RouterOutlet],
+  imports: [NgxMapLibreGLModule, MatIcon, MatIconButton, MatMenuTrigger, MatMenu, MatMenuItem, RouterLink, MatButton, RouterOutlet, LoadingIndicator],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
