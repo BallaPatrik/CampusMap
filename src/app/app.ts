@@ -1,13 +1,13 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {NgxMapLibreGLModule} from '@maplibre/ngx-maplibre-gl';
-import {Router, RouterLink, RouterOutlet} from '@angular/router';
+import {RouterLink, RouterOutlet} from '@angular/router';
 import {LocalStorageKeys} from './constants/local-storage-keys';
 import {MatIcon} from '@angular/material/icon';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 import {IconService} from './services/icon.service';
-import {AuthService} from './services/auth.service';
 import {LoadingIndicator} from './components/loading-indicator/loading-indicator';
+import {AuthStore} from './store/auth.store';
 
 @Component({
   selector: 'app-root',
@@ -18,8 +18,7 @@ import {LoadingIndicator} from './components/loading-indicator/loading-indicator
 export class App implements OnInit {
 
   private readonly icon_service=inject(IconService);
-  private readonly router = inject(Router);
-  private readonly authService=inject(AuthService);
+  private readonly authStore = inject(AuthStore);
 
   ngOnInit(): void {
     //Add the icons to the list
@@ -31,8 +30,6 @@ export class App implements OnInit {
   }
 
   onLogout() {
-    this.authService.logout().subscribe(() => {
-      this.router.navigateByUrl('api/login');
-    });
+    this.authStore.logout();
   }
 }

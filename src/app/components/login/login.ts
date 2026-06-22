@@ -1,6 +1,5 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
-import {AuthService} from '../../services/auth.service';
 import {LocalStorageKeys} from '../../constants/local-storage-keys';
 import {Router} from '@angular/router';
 import {MatError, MatFormField, MatLabel} from '@angular/material/form-field';
@@ -8,7 +7,7 @@ import {MatInput} from '@angular/material/input';
 import {form, FormField, minLength, required} from '@angular/forms/signals';
 import {User} from '../../model/user.model';
 import {FormsModule} from '@angular/forms';
-import {MessageService} from '../../services/message.service';
+import {AuthStore} from '../../store/auth.store';
 
 @Component({
   selector: 'app-login',
@@ -17,10 +16,8 @@ import {MessageService} from '../../services/message.service';
   styleUrl: './login.css',
 })
 export class Login implements OnInit {
-  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-  private readonly messageService = inject(MessageService);
-
+  private readonly authStore = inject(AuthStore);
 
   ngOnInit() {
     if (localStorage.getItem(LocalStorageKeys.TOKEN) !== null) {
@@ -29,16 +26,7 @@ export class Login implements OnInit {
   }
 
   onLogin(name: string, password: string) {
-    this.authService.login(name, password)
-      .subscribe((token) => {
-        if (token) {
-          localStorage.setItem(LocalStorageKeys.TOKEN, token);
-          this.messageService.SendSuccessMessageSnackbar('Login Successful!', 'X');
-          this.router.navigateByUrl('/api/map');
-        } else {
-          this.messageService.SendErrorMessageSnackbar('Wrong email or password!', 'X');
-        }
-      });
+    this.authStore.login({name, password});
   }
 
   //we specify the form model and the initial state as a signal
