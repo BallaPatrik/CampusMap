@@ -40,7 +40,6 @@ export class AuthService {
                   return this.mockJwtToken;
                 })
               );
-
           }
           //If the user doesn't exist, return an observable with a null value
           return of(null);
