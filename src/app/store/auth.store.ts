@@ -18,9 +18,30 @@ interface AuthState {
   token: string | null;
 }
 
+//We need this function to get the user from local storage (can't use AuthService here)'
+function getStoredUser(): User | null {
+
+  //Get the user from local storage
+  const storedUser = localStorage.getItem('currentUser');
+
+  //If the user is not found, return null
+  if (!storedUser) {
+    return null;
+  }
+
+  //Else parse the user from the local storage
+  try {
+    return JSON.parse(storedUser) as User;
+  } catch {
+    //If there is an error parsing the user, remove the user from local storage and return null
+    localStorage.removeItem('currentUser');
+    return null;
+  }
+}
+
 const initialState: AuthState = {
-  user: null,
-  token: null,
+  user: getStoredUser(),
+  token: localStorage.getItem(LocalStorageKeys.TOKEN),
 };
 
 //we create a signal store with the signalStore method, it can be injected like a class, plus we need to declare the initial state of it
