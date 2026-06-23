@@ -86,19 +86,26 @@ export class BuildingService {
     );
   }
 
-  getBuildingById(buildingId: string) {
-    return this.requestService.get<BuildingPointFeature[]>(BUILDING_URL).pipe(
-      //Map the response, because we need parts of the response
+  getBuildingById(buildingId: string): Observable<BuildingPolygon | BuildingPoint | undefined> {
+    return this.requestService.get<Array<BuildingPolygonFeature | BuildingPointFeature>>(BUILDING_URL).pipe(
+      // Map the response, because we only want the building with the given id.
       map(features => {
-        //Find the building with the given id
         const feature = features.find(f => f.id === buildingId);
 
-        //If the building is not found, return undefined
         if (!feature) {
           return undefined;
         }
 
-        //Else return the building
+        if (feature.geometry.type === 'Point') {
+          return {
+            id: feature.id,
+            name: feature.properties.name,
+            category: feature.properties.category,
+            description: feature.properties.description,
+            coordinates: feature.geometry.coordinates
+          };
+        }
+
         return {
           id: feature.id,
           name: feature.properties.name,
@@ -140,6 +147,9 @@ export class BuildingService {
 
   editBuilding(building: BuildingPolygon) {
     //Construct the building feature without the id (omit)
+
+    const buildingId = building.id;
+
     const buildingPolygonFeature: Omit<BuildingPolygonFeature, 'id'> = {
       type: 'Feature',
       properties: {
@@ -153,8 +163,8 @@ export class BuildingService {
       }
     };
 
-    //Send a POST request to the server with the building feature
-    return this.requestService.put<BuildingPolygonFeature>(BUILDING_URL, buildingPolygonFeature).pipe(
+    //Send a PUT request to the server with the building feature
+    return this.requestService.put<BuildingPolygonFeature>(`${BUILDING_URL}/${buildingId}`, buildingPolygonFeature).pipe(
       //Map because we only need parts of the response
       map(feature => ({
         id: feature.id,

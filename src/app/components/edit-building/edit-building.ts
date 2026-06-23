@@ -8,10 +8,11 @@ import {BuildingService} from '../../services/building.service';
 import {MessageService} from '../../services/message.service';
 import {IControl, Map as MapLibreMap, StyleSpecification} from 'maplibre-gl';
 import MapLibreDraw from 'maplibre-gl-draw';
-import {Feature, FeatureCollection, Polygon, Position} from 'geojson';
+import {Feature, FeatureCollection, Point, Polygon, Position} from 'geojson';
 import {BuildingPolygon} from '../../model/building.polygon.model';
 import {form, FormField, minLength, required} from '@angular/forms/signals';
 import {polygonCoordinatesValidator} from '../../validators/polygon-coordinates-validator';
+import {BuildingPoint} from '../../model/building.point.model';
 
 type ActiveDrawState =
   | { kind: 'polygon'; state: any }
@@ -46,11 +47,13 @@ export class EditBuilding {
   private map?: MapLibreMap;
 
   protected selectedBuildingCoordinates = signal(<Position[][]>[[]]);
+  protected selectedBuilding = signal<BuildingPolygon | BuildingPoint | undefined>(undefined);
 
   private undoStack: Position[][][] = [];
   private redoStack: Position[][][] = [];
   private currentState = signal(<Position[][]>([]));
   private activeDrawState?: ActiveDrawState;
+  private isApplyingDraftState = false;
 
 
   ngOnInit() {
@@ -60,8 +63,10 @@ export class EditBuilding {
       layers: [],
     };
 
+    //Get the id from the url
     const id = this.route.snapshot.paramMap.get('id');
 
+    //Get the initial data to populate the forms
     this.getInitialData(id!);
   }
 
@@ -70,21 +75,150 @@ export class EditBuilding {
 
     this.addDraw(map);
 
-    this.clearEveryDrawing();
+    //Get the selected building
+    const building = this.selectedBuilding();
+
+    //If it exists, show it on the map
+    if (building) {
+      this.showBuildingOnMap(building);
+    }
+  }
+
+  private isBuildingPolygon(building: BuildingPolygon | BuildingPoint): building is BuildingPolygon {
+    //Helper function to determine is a Polygon or not
+    return Array.isArray(building.coordinates[0]);
   }
 
   getInitialData(id: string) {
-    const building = this.buildingService.getBuildingById(id).subscribe(building => {
-      console.log(building);
+
+    //Get the data from the server
+    this.buildingService.getBuildingById(id).subscribe(building => {
+      if (!building) {
+        return;
+      }
+
+      //Set the signal to the building's values
+      this.selectedBuilding.set(building);
+
+      //If the building is a Polygon
+      if (this.isBuildingPolygon(building)) {
+        //We normalize the coordinates
+        const normalizedCoordinates = this.normalizePolygonCoordinates(building.coordinates);
+
+        //If we couldn't normalize the coordinates, then we set the signal's value
+        //BUT WITHOUT the coordinates
+        if (!normalizedCoordinates) {
+          this.buildingPolygonModel.update(current => ({
+            ...current,
+            id: building.id,
+            name: building.name,
+            category: building.category,
+            description: building.description,
+            coordinates: []
+          }));
+          return;
+        }
+
+        const polygonBuilding = {
+          ...building,
+          //This just makes sure that the polygon is valid
+          coordinates: this.getValidPolygonCoordinates(normalizedCoordinates)
+        };
+
+        //Set some values
+        this.selectedBuilding.set(polygonBuilding);
+        this.buildingPolygonModel.set(polygonBuilding);
+        this.selectedBuildingCoordinates.set(polygonBuilding.coordinates);
+        this.currentState.set(polygonBuilding.coordinates);
+        this.undoStack = [structuredClone(polygonBuilding.coordinates)];
+        this.redoStack = [];
+      } else {
+        //The editing of a Point is not currently implemented
+        this.buildingPointModel.set(building);
+
+        // this.buildingPolygonModel.update(current => ({
+        //   ...current,
+        //   id: building.id,
+        //   name: building.name,
+        //   category: building.category,
+        //   description: building.description,
+        //   coordinates: []
+        // }));
+      }
+
+      if (this.draw) {
+        this.showBuildingOnMap(building);
+      }
     });
+  }
 
+  private showBuildingOnMap(building: BuildingPolygon | BuildingPoint) {
 
-    //INNEN KELL FOLYTATNI
+    //If the building is a Polygon
+    if (this.isBuildingPolygon(building)) {
+
+      //Normalize the coordinates
+      const normalizedCoordinates = this.normalizePolygonCoordinates(building.coordinates);
+
+      //If there are no valid coordinates then we return
+      if (!normalizedCoordinates) {
+        return;
+      }
+
+      //Make the coordinates valid
+      const coordinates = this.getValidPolygonCoordinates(normalizedCoordinates);
+
+      //These are needed for the undo/redo function
+      this.currentState.set(structuredClone(coordinates));
+      this.undoStack = [structuredClone(coordinates)];
+      this.redoStack = [];
+
+      //Set some values
+      this.selectedBuildingCoordinates.set(coordinates);
+      this.buildingPolygonModel.update(current => ({
+        ...current,
+        coordinates
+      }));
+
+      //Display the building on the map
+      this.replaceDrawFeature(coordinates);
+      return;
+    }
+
+    //If this is a Point
+    //Make a feature collection so we can display it
+    const featureCollection: FeatureCollection<Point> = {
+      type: 'FeatureCollection',
+      features: [{
+        type: 'Feature',
+        properties: {
+          name: building.name,
+          category: building.category,
+          description: building.description
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: building.coordinates
+        }
+      }]
+    };
+
+    //Display it on map
+    this.draw.set(featureCollection);
+
+    //Zoom in on the first coordinate
+    if (this.map) {
+      this.map.flyTo({
+        center: [building.coordinates[0], building.coordinates[1]],
+        zoom: 18
+      });
+    }
   }
 
   addDraw(map: MapLibreMap) {
     this.draw = new MapLibreDraw({
       controls: {
+        point: true,
         polygon: true,
         trash: true,
       },
@@ -98,6 +232,28 @@ export class EditBuilding {
     map.addControl(this.draw as unknown as IControl);
 
     map.on('draw.create', (e) => this.onDrawEvent(e));
+    map.on('draw.update', (e) => this.onDrawEvent(e));
+    map.on('draw.delete', () => this.onDrawDelete());
+  }
+
+  private onDrawDelete() {
+
+    //If a drawing gets deleted, then reset every value
+    //These are needed for undo redo function
+    this.undoStack = [];
+    this.redoStack = [];
+    this.currentState.set([]);
+
+    //This tells us what the draw mode is (Polygon or Line)
+    this.activeDrawState = undefined;
+
+    // Update the signal's and model's value
+    this.selectedBuildingCoordinates.set([]);
+
+    this.buildingPolygonModel.update(building => ({
+      ...building,
+      coordinates: []
+    }));
   }
 
   clearDrawing() {
@@ -137,11 +293,29 @@ export class EditBuilding {
   }
 
   onDrawEvent(e: { features: Feature<Polygon>[]; type: string }) {
+
+    //We are updating the draw feature from code, so we don't need any
+    //draw event caused by our update
+    if (this.isApplyingDraftState) {
+      return;
+    }
+
     // Clear the drawings if there are more than 1 drawing(s)
     this.clearDrawing();
 
+    //Get the first feature
+    const feature = e.features[0];
+
+    //If there is no feature return
+    if (!feature) {
+      return;
+    }
+
     //Get the coordinates
-    const coordinates = e.features[0].geometry.coordinates;
+    const coordinates = structuredClone(feature.geometry.coordinates) as Position[][];
+
+    //Save the completed edit for undo/redo
+    this.saveCompletedDraftState(coordinates);
 
     //Set it to the selected building
     this.selectedBuildingCoordinates.set(coordinates);
@@ -156,7 +330,7 @@ export class EditBuilding {
   undo() {
 
     //If it's empty, then return
-    if (this.undoStack.length === 0) {
+    if (this.undoStack.length <= 1) {
       return;
     }
 
@@ -330,6 +504,29 @@ export class EditBuilding {
     this.currentState.set(coordinates);
   }
 
+  private saveCompletedDraftState(coordinates: Position[][]) {
+
+    //Get the next and current state
+    const nextState = structuredClone(coordinates);
+    const currentState = this.currentState();
+
+    //If the current state and next state are equal, then return
+    if (this.areCoordinatesEqual(currentState, nextState)) {
+      return;
+    }
+
+    //Otherwise push the next state to the undo stack
+    this.undoStack.push(nextState);
+    //Reset the redo stack
+    this.redoStack = [];
+    //And set the current state to the next state
+    this.currentState.set(nextState);
+  }
+
+  private areCoordinatesEqual(first: Position[][], second: Position[][]) {
+    return JSON.stringify(first) === JSON.stringify(second);
+  }
+
   private applyDraftState(coordinates: Position[][]) {
     // Clone the coordinates so applying the state does not accidentally mutate
     // the stored undo/redo data.
@@ -352,7 +549,14 @@ export class EditBuilding {
       }));
 
       // Replace the feature displayed by MapLibre Draw.
-      this.replaceDrawFeature(nextCoordinates);
+      this.isApplyingDraftState = true;
+
+      try {
+        this.replaceDrawFeature(nextCoordinates);
+      } finally {
+        this.isApplyingDraftState = false;
+      }
+
       return;
     }
 
@@ -379,12 +583,47 @@ export class EditBuilding {
     state.currentVertexPosition = lineCoordinates.length;
   }
 
+  //Same helper functions used in create building
+  private isPosition(coords: unknown): coords is Position {
+    return Array.isArray(coords)
+      && typeof coords[0] === 'number'
+      && typeof coords[1] === 'number';
+  }
+
+  private normalizePolygonCoordinates(coords: Position[][] | Position[]): Position[][] | null {
+    if (!Array.isArray(coords) || coords.length === 0) {
+      return null;
+    }
+
+    // Already valid GeoJSON polygon coordinates: [[[lng, lat], ...]]
+    if (Array.isArray(coords[0]) && this.isPosition((coords[0] as Position[])[0])) {
+      return coords as Position[][];
+    }
+
+    // Older flat polygon coordinates: [[lng, lat], [lng, lat], ...]
+    if (this.isPosition(coords[0])) {
+      return [coords as Position[]];
+    }
+
+    return null;
+  }
+
+  private toLngLat(coordinate: Position): [number, number] {
+    return [coordinate[0], coordinate[1]];
+  }
+
   private replaceDrawFeature(coordinates: Position[][]) {
-    // Remove all existing drawn features from the map.
-    this.draw.deleteAll();
+
+    //Normalize the coordinates
+    const normalizedCoordinates = this.normalizePolygonCoordinates(coordinates);
+
+    //Return if we were unsuccessful
+    if (!normalizedCoordinates) {
+      return;
+    }
 
     // Ensure the coordinates form a valid polygon before adding them back to the map.
-    const closedCoordinates = this.getValidPolygonCoordinates(coordinates);
+    const closedCoordinates = this.getValidPolygonCoordinates(normalizedCoordinates);
 
     // If the polygon does not have enough points, there is nothing valid to draw.
     if (closedCoordinates.length === 0) {
@@ -406,6 +645,16 @@ export class EditBuilding {
 
     // Set the new polygon feature on the Draw control.
     this.draw.set(featureCollection);
+
+    const firstCoordinate = closedCoordinates[0]?.[0];
+
+    //This just zooms in to the first coordinate
+    if (this.map && firstCoordinate) {
+      this.map.flyTo({
+        center: this.toLngLat(firstCoordinate),
+        zoom: 16
+      });
+    }
   }
 
   private getValidPolygonCoordinates(coordinates: Position[][]) {
@@ -438,9 +687,24 @@ export class EditBuilding {
     const category = this.editBuildingForm.category().value();
     const description = this.editBuildingForm.description().value();
 
+    const coordinates = this.selectedBuildingCoordinates();
+
     //Send error message if there is no drawing present
-    if (this.selectedBuildingCoordinates().length == 0) {
+    //This check needs to happen like this, because selectedBuildingCoordinates
+    //can be 1 like this [[]], but there is no polygon inside
+    if ((coordinates[0]?.length ?? 0) < 3) {
       this.messageService.SendErrorMessageSnackbar("You must draw a building first!", "X");
+      return;
+    }
+
+    //Get the building
+    const building = {
+      ...this.buildingPolygonModel()
+    };
+
+    //If there is no building, then send an error message and return
+    if (!building.id) {
+      this.messageService.SendErrorMessageSnackbar("Cannot edit building without an id!", "X");
       return;
     }
 
@@ -453,23 +717,19 @@ export class EditBuilding {
     }));
 
 
-    const building = {
-      ...this.buildingPolygonModel()
-    };
-
-
     //Update the building
     this.buildingService.editBuilding(building)
       .subscribe({
-        //After we successfully create the building, we send a message and navigate to the map page
+        //After we successfully edit the building,
+        // we send a message and navigate to the map page
         next: updatedBuilding => {
           this.messageService.SendSuccessMessageSnackbar(
-            'Successfully created building: ' + updatedBuilding.name + '!', 'X');
+            'Successfully edited building: ' + updatedBuilding.name + '!', 'X');
 
           this.router.navigateByUrl('/api/map');
         },
         error: err => {
-          console.error('Failed to create building:', err);
+          console.error('Failed to edit building:', err);
         }
       });
   }
@@ -481,9 +741,16 @@ export class EditBuilding {
     coordinates: [[]]
   });
 
+  buildingPointModel = signal<BuildingPoint>({
+    name: '',
+    category: '',
+    description: '',
+    coordinates: []
+  });
+
 
   //calling the new form() function creates a signal form based on the model and the declared schemaPath configuration
-  editBuildingForm = form(this.buildingPolygonModel, (schemaPath) => {
+  editBuildingForm = form(this.buildingPolygonModel || this.buildingPointModel, (schemaPath) => {
     //there are builtin validators like required, minLength, pattern etc.
     required(schemaPath.name);
     required(schemaPath.category);
