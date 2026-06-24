@@ -1,6 +1,7 @@
 <mat-card
   class="building-card"
   [class.selected-building-card]="selected()"
+  appEditBuilding (editAction)="onEdit()"
 >
   <mat-card-header>
     <mat-card-title>
