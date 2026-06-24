@@ -36,6 +36,7 @@ export class BuildingList implements OnInit {
 
   //This is needed for highlighting buildings on the map
   selectedBuildingIdsChange = output<string[]>();
+  selectedFilterChange = output<string>();
 
   //This is needed highlighting buildings on the map when we select them from the list
   selectedBuildingIdsFromMap = input<string[]>([]);
@@ -70,10 +71,12 @@ export class BuildingList implements OnInit {
     //If we want just the own buildings, then we show those
     if (choice === 'own') {
       this.getOwnBuildings();
+      this.selectedFilterChange.emit('own');
       return;
     }
 
     //Otherwise show own and public buildings
+    this.selectedFilterChange.emit('own+public');
     this.getOwnAndPublicBuildings();
   }
 

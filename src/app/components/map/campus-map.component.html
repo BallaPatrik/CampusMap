@@ -6,6 +6,7 @@
     <app-building-list
       (selectedBuildingIdsChange)="onSelectedBuildingIdsChange($event)"
       [selectedBuildingIdsFromMap]="selectedBuildingIds()"
+      (selectedFilterChange)="loadBuildings($event)"
     />
   </aside>
 

@@ -41,7 +41,7 @@ export class CampusMapComponent implements OnInit{
       layers: [],
     };
 
-    this.loadBuildings();
+    this.loadBuildings("own");
   }
 
   onMapLoad(map: MapLibreMap) {
@@ -115,17 +115,30 @@ export class CampusMapComponent implements OnInit{
     }
   }
 
-  private loadBuildings() {
-    this.buildingService.getOwnBuildings()
-      .pipe(take(1))
-      .subscribe({
-        next: buildings => {
-          this.pois = this.mapBuildingsToFeatureCollection(buildings);
-        },
-        error: err => {
-          console.error('Failed to load buildings for map:', err);
-        }
-      });
+  loadBuildings(filter: string) {
+    if (filter == "own") {
+      this.buildingService.getOwnBuildings()
+        .pipe(take(1))
+        .subscribe({
+          next: buildings => {
+            this.pois = this.mapBuildingsToFeatureCollection(buildings);
+          },
+          error: err => {
+            console.error('Failed to load buildings for map:', err);
+          }
+        });
+    } else {
+      this.buildingService.getOwnAndPublicBuildings()
+        .pipe(take(1))
+        .subscribe({
+          next: buildings => {
+            this.pois = this.mapBuildingsToFeatureCollection(buildings);
+          },
+          error: err => {
+            console.error('Failed to load buildings for map:', err);
+          }
+        });
+    }
   }
 
   private mapBuildingsToFeatureCollection(
