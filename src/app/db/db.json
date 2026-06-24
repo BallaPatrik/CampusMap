@@ -5,7 +5,9 @@
       "properties": {
         "name": "Veszprém Castle",
         "category": "historic",
-        "description": "Historic castle complex on Castle Hill overlooking Veszprém."
+        "description": "Historic castle complex on Castle Hill overlooking Veszprém.",
+        "userId": 0,
+        "isItPublic": true
       },
       "geometry": {
         "type": "Point",
@@ -21,7 +23,9 @@
       "properties": {
         "name": "Fire-watch Tower",
         "category": "lookout",
-        "description": "Iconic fire-watch tower with panoramic views over the city."
+        "description": "Iconic fire-watch tower with panoramic views over the city.",
+        "userId": 0,
+        "isItPublic": false
       },
       "geometry": {
         "type": "Point",
@@ -37,7 +41,9 @@
       "properties": {
         "name": "St. Michael's Cathedral Basilica",
         "category": "church",
-        "description": "Main cathedral of Veszprém, one of the oldest in Hungary."
+        "description": "Main cathedral of Veszprém, one of the oldest in Hungary.",
+        "userId": 1,
+        "isItPublic": true
       },
       "geometry": {
         "type": "Point",
@@ -53,7 +59,9 @@
       "properties": {
         "name": "Statues of Saint Stephen and Gisela",
         "category": "monument",
-        "description": "Famous statue group of the royal couple, a symbol of Veszprém."
+        "description": "Famous statue group of the royal couple, a symbol of Veszprém.",
+        "userId": 1,
+        "isItPublic": false
       },
       "geometry": {
         "type": "Point",
@@ -69,7 +77,9 @@
       "properties": {
         "name": "Heroes' Gate (Castle Gate)",
         "category": "monument",
-        "description": "Memorial gate commemorating Hungarian heroes, entrance to the castle district."
+        "description": "Memorial gate commemorating Hungarian heroes, entrance to the castle district.",
+        "userId": 2,
+        "isItPublic": true
       },
       "geometry": {
         "type": "Point",
@@ -85,7 +95,9 @@
       "properties": {
         "name": "Veszprém Zoo (Kittenberger Kálmán Zoo)",
         "category": "zoo",
-        "description": "Large zoo and wildlife park in Fejes Valley and on Gulya Hill."
+        "description": "Large zoo and wildlife park in Fejes Valley and on Gulya Hill.",
+        "userId": 2,
+        "isItPublic": false
       },
       "geometry": {
         "type": "Point",
@@ -101,7 +113,9 @@
       "properties": {
         "name": "Veszprém City Center",
         "category": "city center",
-        "description": "Approximate center of Veszprém."
+        "description": "Approximate center of Veszprém.",
+        "userId": 0,
+        "isItPublic": true
       },
       "geometry": {
         "type": "Point",
@@ -117,7 +131,9 @@
       "properties": {
         "name": "Lovassy László Grammar School ",
         "category": "School",
-        "description": "Added this for testing purposes"
+        "description": "Added this for testing purposes",
+        "userId": 0,
+        "isItPublic": true
       },
       "geometry": {
         "type": "Polygon",

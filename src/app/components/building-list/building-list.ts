@@ -10,6 +10,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {BuildingSearchPipe} from '../../pipes/building.search.pipe';
 import {forkJoin, take} from 'rxjs';
 import {BuildingPolygon} from '../../model/building.polygon.model';
+import {MatFormField, MatLabel, MatOption, MatSelect, MatSelectChange} from '@angular/material/select';
 
 @Component({
   selector: 'app-building-list',
@@ -19,7 +20,11 @@ import {BuildingPolygon} from '../../model/building.polygon.model';
     BuildingCard,
     ReactiveFormsModule,
     FormsModule,
-    BuildingSearchPipe
+    BuildingSearchPipe,
+    MatSelect,
+    MatOption,
+    MatLabel,
+    MatFormField
   ],
   templateUrl: './building-list.html',
   styleUrl: './building-list.css',
@@ -43,7 +48,7 @@ export class BuildingList implements OnInit {
   ]);
 
   ngOnInit() {
-    this.getAllBuildings();
+    this.getOwnBuildings();
   }
 
   searchString = signal<string>('');
@@ -56,6 +61,21 @@ export class BuildingList implements OnInit {
   selectedBuildingCount = computed(() => this.selectedBuildingIdsFromMap().length);
 
   selectedBuildingIds = signal<string[]>([]);
+
+  onFilterChange(event: MatSelectChange) {
+
+    //Get the select tag's value
+    const choice = event.value;
+
+    //If we want just the own buildings, then we show those
+    if (choice === 'own') {
+      this.getOwnBuildings();
+      return;
+    }
+
+    //Otherwise show own and public buildings
+    this.getOwnAndPublicBuildings();
+  }
 
   isBuildingSelected(buildingId: string | undefined) {
     //Helper function to check if a building is selected
@@ -101,7 +121,7 @@ export class BuildingList implements OnInit {
       this.buildingService.deleteBuildingById(buildingId)))
       .pipe(take(1))
       .subscribe(() => {
-        this.getAllBuildings();
+        this.getOwnBuildings();
       });
     this.messageService.SendSuccessMessageSnackbar('Successfully deleted buildings: '
       + selectedBuildingNames + '!', 'X');
@@ -115,8 +135,8 @@ export class BuildingList implements OnInit {
     this.router.navigateByUrl('/api/building/edit/' + selectedBuildingIds[0]);
   }
 
-  getAllBuildings() {
-    this.buildingService.getBuildingsPoint().subscribe({
+  getOwnBuildings() {
+    this.buildingService.getOwnBuildingsPoint().subscribe({
       next: buildings => {
         this.allBuildingsPoint.set(buildings);
       },
@@ -124,7 +144,7 @@ export class BuildingList implements OnInit {
         console.error('Failed to load point buildings:', err);
       }
     });
-    this.buildingService.getBuildingsPolygon().subscribe({
+    this.buildingService.getOwnBuildingsPolygon().subscribe({
       next: buildings => {
         this.allBuildingsPolygon.set(buildings);
       },
@@ -134,4 +154,22 @@ export class BuildingList implements OnInit {
     });
   }
 
+  getOwnAndPublicBuildings() {
+    this.buildingService.getOwnAndPublicBuildingsPoint().subscribe({
+      next: buildings => {
+        this.allBuildingsPoint.set(buildings);
+      },
+      error: err => {
+        console.error('Failed to load point buildings:', err);
+      }
+    });
+    this.buildingService.getOwnAndPublicBuildingsPolygon().subscribe({
+      next: buildings => {
+        this.allBuildingsPolygon.set(buildings);
+      },
+      error: err => {
+        console.error('Failed to load polygon buildings:', err);
+      }
+    });
+  }
 }

@@ -31,6 +31,16 @@
     (input)="searchString.set($any($event.target).value)"
   >
 </div>
+
+<div class="filter-bar">
+  <mat-form-field appearance="outline">
+    <mat-label>Choose an option</mat-label>
+    <mat-select (selectionChange)="onFilterChange($event)">
+      <mat-option value="own">Own</mat-option>
+      <mat-option value="own+public">Own+Public</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
 <!--$event.target is the input element-->
 <!--($event.target).value is the value of the input element-->
 <!--$any is used to cast the value to any type-->

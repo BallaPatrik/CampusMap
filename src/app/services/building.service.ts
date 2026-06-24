@@ -4,6 +4,7 @@ import {RequestService} from './request.service';
 import {forkJoin, map, Observable} from 'rxjs';
 import {Position} from 'geojson';
 import {BuildingPolygon} from '../model/building.polygon.model';
+import {AuthService} from './auth.service';
 
 const BUILDING_URL = 'http://localhost:3000/buildings';
 
@@ -15,6 +16,8 @@ type BuildingPointFeature = {
     name: string;
     category: string;
     description: string;
+    userId?: number;
+    isItPublic?: boolean;
   };
   geometry: {
     type: 'Point';
@@ -29,6 +32,8 @@ type BuildingPolygonFeature = {
     name: string;
     category: string;
     description: string;
+    userId?: number;
+    isItPublic?: boolean;
   };
   geometry: {
     type: 'Polygon';
@@ -41,11 +46,12 @@ type BuildingPolygonFeature = {
 })
 export class BuildingService {
   private readonly requestService = inject(RequestService);
+  private readonly authService = inject(AuthService);
 
-  getBuildings(): Observable<(BuildingPoint | BuildingPolygon)[]> {
+  getOwnBuildings(): Observable<(BuildingPoint | BuildingPolygon)[]> {
     return forkJoin({
-      points: this.getBuildingsPoint(),
-      polygons: this.getBuildingsPolygon()
+      points: this.getOwnBuildingsPoint(),
+      polygons: this.getOwnBuildingsPolygon()
     }).pipe(
       map(({points, polygons}) => [
         ...points,
@@ -54,32 +60,106 @@ export class BuildingService {
     );
   }
 
-  getBuildingsPolygon(): Observable<BuildingPolygon[]> {
+  getOwnAndPublicBuildings(): Observable<(BuildingPoint | BuildingPolygon)[]> {
+    return forkJoin({
+      points: this.getOwnAndPublicBuildingsPoint(),
+      polygons: this.getOwnAndPublicBuildingsPolygon()
+    }).pipe(
+      map(({points, polygons}) => [
+        ...points,
+        ...polygons
+      ])
+    );
+  }
+
+  getOwnBuildingsPolygon(): Observable<BuildingPolygon[]> {
+
+    const userId = this.authService.getCurrentUser()?.id;
+
+    if (!userId) {
+      return new Observable<BuildingPolygon[]>(() => {
+      });
+    }
+
     return this.requestService.get<BuildingPolygonFeature[]>(BUILDING_URL).pipe(
       map(features =>
         features
-          .filter(f => f.geometry.type === 'Polygon')
+          .filter(f => f.geometry.type === 'Polygon' && f.properties.userId === Number(userId))
           .map(feature => ({
             id: feature.id,
             name: feature.properties.name,
             category: feature.properties.category,
             description: feature.properties.description,
+            userId: feature.properties.userId,
+            isItPublic: feature.properties.isItPublic,
             coordinates: feature.geometry.coordinates
           }))
       )
     );
   }
 
-  getBuildingsPoint(): Observable<BuildingPoint[]> {
-    return this.requestService.get<BuildingPointFeature[]>(BUILDING_URL).pipe(
+  getOwnAndPublicBuildingsPolygon(): Observable<BuildingPolygon[]> {
+
+    const userId = this.authService.getCurrentUser()?.id;
+
+    if (!userId) {
+      return new Observable<BuildingPolygon[]>(() => {
+      });
+    }
+
+    return this.requestService.get<BuildingPolygonFeature[]>(BUILDING_URL).pipe(
       map(features =>
         features
-          .filter(f => f.geometry.type === 'Point')
+          .filter(f => f.geometry.type === 'Polygon' && (f.properties.userId === Number(userId) || f.properties.isItPublic === true))
           .map(feature => ({
             id: feature.id,
             name: feature.properties.name,
             category: feature.properties.category,
             description: feature.properties.description,
+            userId: feature.properties.userId,
+            isItPublic: feature.properties.isItPublic,
+            coordinates: feature.geometry.coordinates
+          }))
+      )
+    );
+  }
+
+  getOwnBuildingsPoint(): Observable<BuildingPoint[]> {
+
+    const userId = this.authService.getCurrentUser()?.id;
+
+    return this.requestService.get<BuildingPointFeature[]>(BUILDING_URL).pipe(
+      map(features =>
+        features
+          .filter(f => f.geometry.type === 'Point' && f.properties.userId === Number(userId))
+          .map(feature => ({
+            id: feature.id,
+            name: feature.properties.name,
+            category: feature.properties.category,
+            description: feature.properties.description,
+            userId: feature.properties.userId,
+            isItPublic: feature.properties.isItPublic,
+            coordinates: feature.geometry.coordinates
+          }))
+      )
+    );
+  }
+
+  getOwnAndPublicBuildingsPoint(): Observable<BuildingPoint[]> {
+
+    const userId = this.authService.getCurrentUser()?.id;
+
+    return this.requestService.get<BuildingPointFeature[]>(BUILDING_URL).pipe(
+      map(features =>
+        features
+          .filter(f => f.geometry.type === 'Point' && (f.properties.userId === Number(userId) || f.properties.isItPublic === true))
+          .map(feature => ({
+            id: feature.id,
+            name: feature.properties.name,
+            category: feature.properties.category,
+            description: feature.properties.description,
+            userId: feature.properties.userId,
+            isItPublic: feature.properties.isItPublic,
             coordinates: feature.geometry.coordinates
           }))
       )
@@ -102,6 +182,8 @@ export class BuildingService {
             name: feature.properties.name,
             category: feature.properties.category,
             description: feature.properties.description,
+            userId: feature.properties.userId,
+            isItPublic: feature.properties.isItPublic,
             coordinates: feature.geometry.coordinates
           };
         }
@@ -111,6 +193,8 @@ export class BuildingService {
           name: feature.properties.name,
           category: feature.properties.category,
           description: feature.properties.description,
+          userId: feature.properties.userId,
+          isItPublic: feature.properties.isItPublic,
           coordinates: feature.geometry.coordinates
         };
       })
@@ -124,7 +208,9 @@ export class BuildingService {
       properties: {
         name: building.name,
         category: building.category,
-        description: building.description
+        description: building.description,
+        userId: building.userId,
+        isItPublic: building.isItPublic,
       },
       geometry: {
         type: 'Polygon',
@@ -140,6 +226,8 @@ export class BuildingService {
         name: feature.properties.name,
         category: feature.properties.category,
         description: feature.properties.description,
+        userId: feature.properties.userId,
+        isItPublic: feature.properties.isItPublic,
         coordinates: feature.geometry.coordinates
       }))
     );
@@ -155,7 +243,9 @@ export class BuildingService {
       properties: {
         name: building.name,
         category: building.category,
-        description: building.description
+        description: building.description,
+        userId: building.userId,
+        isItPublic: building.isItPublic,
       },
       geometry: {
         type: 'Polygon',
@@ -171,6 +261,8 @@ export class BuildingService {
         name: feature.properties.name,
         category: feature.properties.category,
         description: feature.properties.description,
+        userId: feature.properties.userId,
+        isItPublic: feature.properties.isItPublic,
         coordinates: feature.geometry.coordinates
       }))
     );

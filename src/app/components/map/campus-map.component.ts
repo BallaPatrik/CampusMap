@@ -116,7 +116,7 @@ export class CampusMapComponent implements OnInit{
   }
 
   private loadBuildings() {
-    this.buildingService.getBuildings()
+    this.buildingService.getOwnBuildings()
       .pipe(take(1))
       .subscribe({
         next: buildings => {

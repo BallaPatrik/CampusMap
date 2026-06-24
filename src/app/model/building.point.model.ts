@@ -7,5 +7,6 @@ export interface BuildingPoint {
   description: string;
   coordinates: Position;
   userId?: number;
+  isItPublic?: boolean;
 }
 
