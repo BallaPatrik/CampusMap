@@ -1,72 +1,124 @@
 <h1 class="page-title">Campus Map</h1>
-<div class="map-container">
-  <mgl-map
-    [mapStyle]="style"
-    [zoom]="[13]"
-    [maxZoom]="19"
-    [center]="[17.908950535135272, 47.088969173638375]"
-    (mapLoad)="onMapLoad($event)"
-  >
-    <mgl-raster-source
-      id="base-source"
-      attribution="(c) OpenStreetMap contributors"
-      [tileSize]="256"
-      [tiles]="['https://tile.openstreetmap.org/{z}/{x}/{y}.png']"
-    />
-    <mgl-layer id="base-layer" type="raster" source="base-source" />
 
-    <mgl-geojson-source id="pois-source" [data]="pois" />
-
-    <!-- Polygon areas are rendered with a fill layer. -->
-    <mgl-layer
-      id="pois-polygon-fill-layer"
-      type="fill"
-      source="pois-source"
-      [filter]="['==', ['geometry-type'], 'Polygon']"
-      [paint]="{
-        'fill-color': '#2563eb',
-        'fill-opacity': 0.28
-      }"
+<div class="map-page-layout">
+  <!--Make the building list like a sidebar-->
+  <aside class="building-list-panel">
+    <app-building-list
+      (selectedBuildingIdsChange)="onSelectedBuildingIdsChange($event)"
     />
+  </aside>
 
-    <!-- Polygon borders are rendered separately so the building outline stays visible. -->
-    <mgl-layer
-      id="pois-polygon-outline-layer"
-      type="line"
-      source="pois-source"
-      [filter]="['==', ['geometry-type'], 'Polygon']"
-      [paint]="{
-        'line-color': '#1d4ed8',
-        'line-width': 2
-      }"
-    />
+  <div class="map-container">
+    <mgl-map
+      [mapStyle]="style"
+      [zoom]="[13]"
+      [maxZoom]="19"
+      [center]="[17.908950535135272, 47.088969173638375]"
+      (mapLoad)="onMapLoad($event)"
+    >
+      <mgl-raster-source
+        id="base-source"
+        attribution="(c) OpenStreetMap contributors"
+        [tileSize]="256"
+        [tiles]="['https://tile.openstreetmap.org/{z}/{x}/{y}.png']"
+      />
+      <mgl-layer id="base-layer" type="raster" source="base-source"/>
 
-    <!-- Point buildings are rendered as clickable circles. -->
-    <mgl-layer
-      id="pois-point-layer"
-      type="circle"
-      source="pois-source"
-      [filter]="['==', ['geometry-type'], 'Point']"
-      [paint]="{
-        'circle-color': '#2563eb',
-        'circle-radius': 7,
-        'circle-stroke-color': '#ffffff',
-        'circle-stroke-width': 2
-      }"
-    />
+      <mgl-geojson-source id="pois-source" [data]="pois"/>
 
-    <!-- Labels work for both Points and Polygons because they use the same GeoJSON source. -->
-    <mgl-layer
-      id="pois-label-layer"
-      type="symbol"
-      source="pois-source"
-      [layout]="{
-        'text-field': ['get', 'name'],
-        'text-offset': [0, 1.2],
-        'text-size': 16,
-        'text-anchor': 'top'
-      }"
-      [paint]="{ 'text-color': ['get', 'color'] }"
-    />
-  </mgl-map>
+      <!-- Polygon areas are rendered with a fill layer. -->
+      <mgl-layer
+        id="pois-polygon-fill-layer"
+        type="fill"
+        source="pois-source"
+        [filter]="['==', ['geometry-type'], 'Polygon']"
+        [paint]="{
+          'fill-color': [
+            'case',
+            ['in', ['get', 'id'], ['literal', selectedBuildingIds()]],
+            '#f59e0b',
+            '#2563eb'
+          ],
+          'fill-opacity': [
+            'case',
+            ['in', ['get', 'id'], ['literal', selectedBuildingIds()]],
+            0.55,
+            0.28
+          ]
+        }"
+      />
+
+      <!-- Polygon borders are rendered separately so the building outline stays visible. -->
+      <mgl-layer
+        id="pois-polygon-outline-layer"
+        type="line"
+        source="pois-source"
+        [filter]="['==', ['geometry-type'], 'Polygon']"
+        [paint]="{
+          'line-color': [
+            'case',
+            ['in', ['get', 'id'], ['literal', selectedBuildingIds()]],
+            '#f97316',
+            '#1d4ed8'
+          ],
+          'line-width': [
+            'case',
+            ['in', ['get', 'id'], ['literal', selectedBuildingIds()]],
+            5,
+            2
+          ]
+        }"
+      />
+
+      <!-- Point buildings are rendered as clickable circles. -->
+      <mgl-layer
+        id="pois-point-layer"
+        type="circle"
+        source="pois-source"
+        [filter]="['==', ['geometry-type'], 'Point']"
+        [paint]="{
+          'circle-color': [
+            'case',
+            ['in', ['get', 'id'], ['literal', selectedBuildingIds()]],
+            '#f59e0b',
+            '#2563eb'
+          ],
+          'circle-radius': [
+            'case',
+            ['in', ['get', 'id'], ['literal', selectedBuildingIds()]],
+            11,
+            7
+          ],
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': [
+            'case',
+            ['in', ['get', 'id'], ['literal', selectedBuildingIds()]],
+            4,
+            2
+          ]
+        }"
+      />
+
+      <!-- Labels work for both Points and Polygons because they use the same GeoJSON source. -->
+      <mgl-layer
+        id="pois-label-layer"
+        type="symbol"
+        source="pois-source"
+        [layout]="{
+          'text-field': ['get', 'name'],
+          'text-offset': [0, 1.2],
+          'text-size': 16,
+          'text-anchor': 'top'
+        }"
+        [paint]="{
+          'text-color': [
+            'case',
+            ['in', ['get', 'id'], ['literal', selectedBuildingIds()]],
+            '#f97316',
+            ['get', 'color']
+          ]
+        }"
+      />
+    </mgl-map>
+  </div>
 </div>

@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, output, signal} from '@angular/core';
 import {MatFabButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {Router} from '@angular/router';
@@ -28,6 +28,9 @@ export class BuildingList implements OnInit {
   private readonly router = inject(Router);
   private readonly messageService = inject(MessageService);
   private readonly buildingService = inject(BuildingService);
+
+  //This is needed for highlighting buildings on the map
+  selectedBuildingIdsChange = output<string[]>();
 
   allBuildingsPoint = signal<BuildingPoint[]>([]);
   allBuildingsPolygon = signal<BuildingPolygon[]>([]);
@@ -70,6 +73,8 @@ export class BuildingList implements OnInit {
         ...this.selectedBuildingIds(),
         buildingId]);
     }
+    //Emit the new selection
+    this.selectedBuildingIdsChange.emit(this.selectedBuildingIds());
   }
 
   onDeleteMany() {
@@ -86,6 +91,8 @@ export class BuildingList implements OnInit {
     this.messageService.SendSuccessMessageSnackbar('Successfully deleted buildings: '
       + selectedBuildingNames + '!', 'X');
     this.selectedBuildingIds.set([]);
+    //Emit the new selection
+    this.selectedBuildingIdsChange.emit(this.selectedBuildingIds());
   }
 
   onEdit() {

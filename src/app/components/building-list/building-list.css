@@ -24,7 +24,7 @@
 }
 
 .button-container {
-  display: flex;
+  display: block;
   gap: 20px;
 }
 

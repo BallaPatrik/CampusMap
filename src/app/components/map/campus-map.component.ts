@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {IControl, Map as MapLibreMap, Popup, StyleSpecification} from 'maplibre-gl';
 import MapLibreDraw from 'maplibre-gl-draw';
 import {Feature, FeatureCollection, GeoJsonProperties, Geometry, Polygon, Position} from 'geojson';
@@ -8,11 +8,13 @@ import {take} from 'rxjs';
 import {BuildingService} from '../../services/building.service';
 import {BuildingPoint} from '../../model/building.point.model';
 import {BuildingPolygon} from '../../model/building.polygon.model';
+import {BuildingList} from '../building-list/building-list';
 
 @Component({
   selector: 'app-map',
   imports: [
-    NgxMapLibreGLModule
+    NgxMapLibreGLModule,
+    BuildingList
   ],
   templateUrl: './campus-map.component.html',
   styleUrl: './campus-map.component.css',
@@ -29,6 +31,9 @@ export class CampusMapComponent implements OnInit{
 
   private map?: MapLibreMap;
 
+  //This is needed for making the buildings different style if they are selected
+  protected selectedBuildingIds = signal<string[]>([]);
+
   ngOnInit() {
     this.style = {
       version: 8,
@@ -44,6 +49,11 @@ export class CampusMapComponent implements OnInit{
 
     this.addDraw(map);
     this.addPopups(map);
+  }
+
+  protected onSelectedBuildingIdsChange(buildingIds: string[]) {
+    //When the change happens, we set the selectedBuildingIds signal
+    this.selectedBuildingIds.set(buildingIds);
   }
 
   private loadBuildings() {
@@ -91,6 +101,7 @@ export class CampusMapComponent implements OnInit{
       type: 'Feature',
       id: building.id,
       properties: {
+        id: building.id,
         name: building.name,
         category: building.category,
         description: building.description,
