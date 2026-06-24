@@ -1,7 +1,13 @@
-<mat-card [style.width]="'25vw'">
+<mat-card
+  class="building-card"
+  [class.selected-building-card]="selected()"
+>
   <mat-card-header>
     <mat-card-title>
-      <mat-checkbox (change)="onSelect()"></mat-checkbox>
+      <mat-checkbox
+        [checked]="selected()"
+        (change)="onSelect()"
+      ></mat-checkbox>
       {{ building().name }}
     </mat-card-title>
   </mat-card-header>

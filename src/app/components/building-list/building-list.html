@@ -46,7 +46,7 @@
 <div class="building-grid">
   @for (building of allBuildings() | buildingSearch: searchString(); track building.id) {
     <app-building-card
-      [building]="building" (selectAction)="onSelect($event)"
+      [building]="building" (selectAction)="onSelect($event)" [selected]="isBuildingSelected(building.id)"
     />
   }
 </div>

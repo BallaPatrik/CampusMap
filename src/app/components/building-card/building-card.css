@@ -8,3 +8,15 @@ mat-card {
   height: 100%;
   box-sizing: border-box;
 }
+
+.building-card {
+  transition: border-color 150ms ease,
+  box-shadow 150ms ease,
+  background-color 150ms ease;
+}
+
+.selected-building-card {
+  border: 2px solid #f97316;
+  background-color: #fff7ed;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.18);
+}

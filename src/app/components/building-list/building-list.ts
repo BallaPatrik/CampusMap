@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, output, signal} from '@angular/core';
+import {Component, computed, inject, input, OnInit, output, signal} from '@angular/core';
 import {MatFabButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {Router} from '@angular/router';
@@ -32,6 +32,9 @@ export class BuildingList implements OnInit {
   //This is needed for highlighting buildings on the map
   selectedBuildingIdsChange = output<string[]>();
 
+  //This is needed highlighting buildings on the map when we select them from the list
+  selectedBuildingIdsFromMap = input<string[]>([]);
+
   allBuildingsPoint = signal<BuildingPoint[]>([]);
   allBuildingsPolygon = signal<BuildingPolygon[]>([]);
   allBuildings = computed(() => [
@@ -50,27 +53,39 @@ export class BuildingList implements OnInit {
   }
 
   //we can derive the form's state with computed fields
-  selectedBuildingCount = computed(() => this.selectedBuildingIds().length);
+  selectedBuildingCount = computed(() => this.selectedBuildingIdsFromMap().length);
 
   selectedBuildingIds = signal<string[]>([]);
+
+  isBuildingSelected(buildingId: string | undefined) {
+    //Helper function to check if a building is selected
+
+    if (!buildingId) {
+      return false;
+    }
+
+    return this.selectedBuildingIdsFromMap().includes(buildingId);
+  }
 
   onSelect(buildingId: string) {
     //This handles the selection of the building
 
+    const currentSelectedBuildingIds = this.selectedBuildingIdsFromMap();
+
     //This part handles when we remove the building from the selection
     //If the building is already selected, we remove it from the selection
-    if (this.selectedBuildingIds().includes(buildingId)) {
+    if (currentSelectedBuildingIds.includes(buildingId)) {
       this.selectedBuildingIds.set(
         //We filter out everything else but the buildingId from the array,
         //and we set the new array to the filtered array.
-        this.selectedBuildingIds().filter(id => id !== buildingId)
+        currentSelectedBuildingIds.filter(id => id !== buildingId)
       );
     }
       //This part handles when we add the building to the selection
     //If the building is NOT selected, we add it from the selection
     else {
       this.selectedBuildingIds.set([
-        ...this.selectedBuildingIds(),
+        ...currentSelectedBuildingIds,
         buildingId]);
     }
     //Emit the new selection
@@ -78,11 +93,11 @@ export class BuildingList implements OnInit {
   }
 
   onDeleteMany() {
-    let selectedBuildingIds = this.selectedBuildingIds();
+    let selectedBuildingIds = this.selectedBuildingIdsFromMap();
     let selectedBuildingNames = selectedBuildingIds.map(
       buildingId => this.allBuildings().find(building => building.id === buildingId)?.name);
 
-    forkJoin(this.selectedBuildingIds().map((buildingId) =>
+    forkJoin(selectedBuildingIds.map((buildingId) =>
       this.buildingService.deleteBuildingById(buildingId)))
       .pipe(take(1))
       .subscribe(() => {
@@ -96,7 +111,7 @@ export class BuildingList implements OnInit {
   }
 
   onEdit() {
-    let selectedBuildingIds = this.selectedBuildingIds();
+    let selectedBuildingIds = this.selectedBuildingIdsFromMap();
     this.router.navigateByUrl('/api/building/edit/' + selectedBuildingIds[0]);
   }
 

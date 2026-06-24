@@ -5,6 +5,7 @@
   <aside class="building-list-panel">
     <app-building-list
       (selectedBuildingIdsChange)="onSelectedBuildingIdsChange($event)"
+      [selectedBuildingIdsFromMap]="selectedBuildingIds()"
     />
   </aside>
 

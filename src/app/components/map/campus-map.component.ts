@@ -3,7 +3,7 @@ import {IControl, Map as MapLibreMap, Popup, StyleSpecification} from 'maplibre-
 import MapLibreDraw from 'maplibre-gl-draw';
 import {Feature, FeatureCollection, GeoJsonProperties, Geometry, Polygon, Position} from 'geojson';
 import {NgxMapLibreGLModule} from '@maplibre/ngx-maplibre-gl';
-import {centroid} from '@turf/turf';
+import {bbox, centroid} from '@turf/turf';
 import {take} from 'rxjs';
 import {BuildingService} from '../../services/building.service';
 import {BuildingPoint} from '../../model/building.point.model';
@@ -49,11 +49,70 @@ export class CampusMapComponent implements OnInit{
 
     this.addDraw(map);
     this.addPopups(map);
+    this.addBuildingClickSelection(map);
   }
 
   protected onSelectedBuildingIdsChange(buildingIds: string[]) {
+
+    //Get the newly selected building's id from the selection
+    const newlySelectedBuildingId = buildingIds.find(
+      //Get the id from the new list that WAS NOT IN the previous list
+      buildingId => !this.selectedBuildingIds().includes(buildingId)
+    );
+
     //When the change happens, we set the selectedBuildingIds signal
     this.selectedBuildingIds.set(buildingIds);
+
+    //If a new building was selected from the list, zoom to it
+    if (newlySelectedBuildingId) {
+      this.zoomToBuilding(newlySelectedBuildingId);
+    }
+  }
+
+  private zoomToBuilding(buildingId: string) {
+
+    //If there is no map, then return
+    if (!this.map) {
+      return;
+    }
+
+    //Get the feature's id
+    const feature = this.pois.features.find(
+      feature => feature.properties?.['id'] === buildingId
+    );
+
+    //If it doesn't exist, then return
+    if (!feature) {
+      return;
+    }
+
+    if (feature.geometry.type === 'Point') {
+      this.map.flyTo({
+        center: [
+          feature.geometry.coordinates[0],
+          feature.geometry.coordinates[1]
+        ],
+        zoom: 18,
+        essential: true
+      });
+      return;
+    }
+
+    if (feature.geometry.type === 'Polygon') {
+      const [minLng, minLat, maxLng, maxLat] = bbox(feature);
+
+      this.map.fitBounds(
+        [
+          [minLng, minLat],
+          [maxLng, maxLat]
+        ],
+        {
+          padding: 80,
+          maxZoom: 18,
+          duration: 1000
+        }
+      );
+    }
   }
 
   private loadBuildings() {
@@ -196,6 +255,47 @@ export class CampusMapComponent implements OnInit{
 
   onDrawEvent(e: { features: Feature<Polygon>[]; type: string }) {
     //console.log(e);
+  }
+
+  private addBuildingClickSelection(map: MapLibreMap) {
+    //This function handles building selection when we click on the map
+
+    //Create a click event on the point and polygon layer
+    map.on('click', ['pois-point-layer', 'pois-polygon-fill-layer'], (e) => {
+
+      //If there are no features, then return
+      if (!e.features || e.features.length === 0) {
+        return;
+      }
+
+      //Get the first feature's id
+      const feature = e.features[0] as Feature<Geometry, GeoJsonProperties>;
+      const buildingId = feature.properties?.['id'];
+
+      //If it's not a string then return
+      if (typeof buildingId !== 'string') {
+        return;
+      }
+
+      //Else we want to toggle the building
+      this.toggleSelectedBuilding(buildingId);
+    });
+  }
+
+  private toggleSelectedBuilding(buildingId: string) {
+    //If the building is already selected, then we remove it from the list
+    if (this.selectedBuildingIds().includes(buildingId)) {
+      this.selectedBuildingIds.set(
+        this.selectedBuildingIds().filter(id => id !== buildingId)
+      );
+      return;
+    }
+
+    //Else we add it to the list
+    this.selectedBuildingIds.set([
+      ...this.selectedBuildingIds(),
+      buildingId
+    ]);
   }
 
   addPopups(map: MapLibreMap) {

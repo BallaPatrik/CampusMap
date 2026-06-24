@@ -21,6 +21,9 @@ export class BuildingCard {
 
   selectAction = output<string>();
 
+  //This is used to highlight the building on the map if we select it from the list
+  readonly selected = input<boolean>(false);
+
   onSelect() {
     if (!this.building().id) return;
     this.selectAction.emit(this.building().id!);
