@@ -12,6 +12,8 @@ import MapLibreDraw from 'maplibre-gl-draw';
 import {Feature, FeatureCollection, Polygon, Position} from 'geojson';
 import {BuildingPolygon} from '../../model/building.polygon.model';
 import {polygonCoordinatesValidator} from '../../validators/polygon-coordinates-validator';
+import {MatCheckbox} from '@angular/material/checkbox';
+import {AuthService} from '../../services/auth.service';
 
 type ActiveDrawState =
   | { kind: 'polygon'; state: any }
@@ -30,7 +32,8 @@ type ActiveDrawState =
     FormField,
     LayerComponent,
     MapComponent,
-    RasterSourceComponent
+    RasterSourceComponent,
+    MatCheckbox
   ],
   templateUrl: './create-building.html',
   styleUrl: './create-building.css',
@@ -38,6 +41,7 @@ type ActiveDrawState =
 export class CreateBuilding implements OnInit {
   private readonly router = inject(Router);
   private readonly buildingService = inject(BuildingService);
+  private readonly authService = inject(AuthService);
   private readonly messageService = inject(MessageService);
 
   protected style!: StyleSpecification;
@@ -417,12 +421,22 @@ export class CreateBuilding implements OnInit {
     });
   }
 
+  onPublicChange(isItPublic: boolean) {
+    //Update the model's isItPublic property
+    this.buildingPolygonModel.update(building => ({
+      ...building,
+      isItPublic
+    }));
+  }
+
   onCreate() {
 
     //Get the form values
     const name = this.createBuildingForm.name().value();
     const category = this.createBuildingForm.category().value();
     const description = this.createBuildingForm.description().value();
+    const userId = this.authService.getCurrentUserId();
+    const isItPublic = this.createBuildingForm().value().isItPublic;
 
     //Send error message if there is no drawing present
     if (this.selectedBuildingCoordinates().length == 0) {
@@ -435,7 +449,9 @@ export class CreateBuilding implements OnInit {
       ...building,
       name,
       category,
-      description
+      description,
+      userId,
+      isItPublic
     }));
 
 

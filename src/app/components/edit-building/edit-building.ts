@@ -13,6 +13,8 @@ import {BuildingPolygon} from '../../model/building.polygon.model';
 import {form, FormField, minLength, required} from '@angular/forms/signals';
 import {polygonCoordinatesValidator} from '../../validators/polygon-coordinates-validator';
 import {BuildingPoint} from '../../model/building.point.model';
+import {MatCheckbox} from '@angular/material/checkbox';
+import {AuthService} from '../../services/auth.service';
 
 type ActiveDrawState =
   | { kind: 'polygon'; state: any }
@@ -31,7 +33,8 @@ type ActiveDrawState =
     MatLabel,
     RasterSourceComponent,
     ReactiveFormsModule,
-    FormField
+    FormField,
+    MatCheckbox
   ],
   templateUrl: './edit-building.html',
   styleUrl: './edit-building.css',
@@ -40,6 +43,7 @@ export class EditBuilding {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly buildingService = inject(BuildingService);
+  private readonly authService = inject(AuthService);
   private readonly messageService = inject(MessageService);
 
   protected style!: StyleSpecification;
@@ -680,12 +684,22 @@ export class EditBuilding {
     });
   }
 
+  onPublicChange(isItPublic: boolean) {
+    //Update the model's isItPublic property
+    this.buildingPolygonModel.update(building => ({
+      ...building,
+      isItPublic
+    }));
+  }
+
   onEdit() {
 
     //Get the form values
     const name = this.editBuildingForm.name().value();
     const category = this.editBuildingForm.category().value();
     const description = this.editBuildingForm.description().value();
+    const userId = this.authService.getCurrentUserId();
+    const isItPublic = this.editBuildingForm().value().isItPublic;
 
     const coordinates = this.selectedBuildingCoordinates();
 
@@ -713,7 +727,9 @@ export class EditBuilding {
       ...building,
       name,
       category,
-      description
+      description,
+      userId,
+      isItPublic
     }));
 
 

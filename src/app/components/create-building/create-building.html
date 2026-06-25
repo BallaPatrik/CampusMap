@@ -25,6 +25,15 @@
       <!-- We bind form fields to template code using the [formField] attribute -->
       <input matInput placeholder="Description" [formField]="createBuildingForm.description"/>
     </mat-form-field>
+    <div class="public-checkbox-container">
+      <mat-label>Public:</mat-label>
+      <!-- We bind form fields to template code using the [formField] attribute -->
+      <mat-checkbox
+        [checked]="createBuildingForm().value().isItPublic"
+        (change)="onPublicChange($event.checked)"
+      >
+      </mat-checkbox>
+    </div>
 
   </div>
   @if (createBuildingForm.name().valid() && createBuildingForm.category().valid() &&

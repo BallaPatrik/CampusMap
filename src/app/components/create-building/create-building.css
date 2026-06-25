@@ -29,6 +29,11 @@ mgl-map {
   width: 80%;
 }
 
+.public-checkbox-container {
+  display: flex;
+  align-items: center;
+}
+
 .error-message {
   text-align: center;
   margin-top: 20px
