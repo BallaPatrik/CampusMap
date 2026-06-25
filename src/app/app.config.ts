@@ -4,6 +4,7 @@ import {routes} from './app.routes';
 import {provideHttpClient, withInterceptors} from '@angular/common/http';
 import {authInterceptor} from './interceptors/auth-interceptor';
 import {loadingInterceptor} from './interceptors/loading-interceptor';
+import {buildingOwnershipInterceptor} from './interceptors/building-ownership-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -13,8 +14,8 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(withInterceptors([
-      authInterceptor, loadingInterceptor
+      authInterceptor, loadingInterceptor, buildingOwnershipInterceptor
     ]))
-    //provideHttpClient(withInterceptors([authInterceptor, loadingInterceptor, loggingInterceptor]))
+    //provideHttpClient(withInterceptors([authInterceptor, loadingInterceptor, buildingOwnershipInterceptor, loggingInterceptor]))
   ]
 };

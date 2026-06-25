@@ -47,6 +47,11 @@ export class RequestService {
       this.messageService.SendErrorMessageSnackbar('Full HTTP error:' + error, 'X');
     }
 
+    if (error.status === 403) {
+      this.messageService.SendErrorMessageSnackbar('You are not authorized to perform this action!', 'X');
+      return throwError(() => 'You are not authorized to perform this action!');
+    }
+
     // return an observable with a user-facing error message
     this.messageService.SendErrorMessageSnackbar('Something bad happened; please try again later.', 'X');
     return throwError(() => 'Something bad happened; please try again later.');

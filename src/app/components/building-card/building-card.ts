@@ -25,7 +25,7 @@ export class BuildingCard {
   protected readonly router = inject(Router);
   protected readonly buildingService = inject(BuildingService);
   protected readonly authService = inject(AuthService);
-  protected building = input.required<BuildingPoint | BuildingPolygon>();
+  building = input.required<BuildingPoint | BuildingPolygon>();
 
   selectAction = output<string>();
 
