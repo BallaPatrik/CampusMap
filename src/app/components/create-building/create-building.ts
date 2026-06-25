@@ -55,6 +55,8 @@ export class CreateBuilding implements OnInit {
   private currentState = signal(<Position[][]>([]));
   private activeDrawState?: ActiveDrawState;
 
+  private isApplyingDraftState = false;
+
 
   ngOnInit() {
     this.style = {
@@ -88,6 +90,7 @@ export class CreateBuilding implements OnInit {
     map.addControl(this.draw as unknown as IControl);
 
     map.on('draw.create', (e) => this.onDrawEvent(e));
+    map.on('draw.update', (e) => this.onDrawEvent(e));
   }
 
   clearDrawing() {
@@ -127,11 +130,21 @@ export class CreateBuilding implements OnInit {
   }
 
   onDrawEvent(e: { features: Feature<Polygon>[]; type: string }) {
+
+    //We are updating the draw feature from code, so we don't need any
+    //draw event caused by our update
+    if (this.isApplyingDraftState) {
+      return;
+    }
+
     // Clear the drawings if there are more than 1 drawing(s)
     this.clearDrawing();
 
     //Get the coordinates
     const coordinates = e.features[0].geometry.coordinates;
+
+    //Save the completed edit for undo/redo
+    this.saveCompletedDraftState(coordinates);
 
     //Set it to the selected building
     this.selectedBuildingCoordinates.set(coordinates);
@@ -141,6 +154,29 @@ export class CreateBuilding implements OnInit {
       ...building,
       coordinates
     }));
+  }
+
+  private saveCompletedDraftState(coordinates: Position[][]) {
+
+    //Get the next and current state
+    const nextState = structuredClone(coordinates);
+    const currentState = this.currentState();
+
+    //If the current state and next state are equal, then return
+    if (this.areCoordinatesEqual(currentState, nextState)) {
+      return;
+    }
+
+    //Otherwise push the next state to the undo stack
+    this.undoStack.push(nextState);
+    //Reset the redo stack
+    this.redoStack = [];
+    //And set the current state to the next state
+    this.currentState.set(nextState);
+  }
+
+  private areCoordinatesEqual(first: Position[][], second: Position[][]) {
+    return JSON.stringify(first) === JSON.stringify(second);
   }
 
   undo() {

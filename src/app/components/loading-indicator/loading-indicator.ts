@@ -22,7 +22,7 @@ export class LoadingIndicator implements OnInit {
   loading$: Observable<boolean>;
 
   @Input()
-    //We can check the route transitions by setting this to truu
+    //We can check the route transitions by setting this to true
   detectRouteTransitions = false;
 
   constructor() {
