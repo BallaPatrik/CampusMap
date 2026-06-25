@@ -464,7 +464,9 @@ export class CreateBuilding implements OnInit {
     name: '',
     category: '',
     description: '',
-    coordinates: [[]]
+    coordinates: [[]],
+    userId: 0,
+    isItPublic: false
   });
 
 

@@ -718,7 +718,7 @@ export class EditBuilding {
 
 
     //Update the building
-    this.buildingService.editBuilding(building)
+    this.buildingService.editPolygonBuilding(building)
       .subscribe({
         //After we successfully edit the building,
         // we send a message and navigate to the map page
@@ -738,14 +738,18 @@ export class EditBuilding {
     name: '',
     category: '',
     description: '',
-    coordinates: [[]]
+    coordinates: [[]],
+    userId: 0,
+    isItPublic: false
   });
 
   buildingPointModel = signal<BuildingPoint>({
     name: '',
     category: '',
     description: '',
-    coordinates: []
+    coordinates: [],
+    userId: 0,
+    isItPublic: false
   });
 
 

@@ -14,8 +14,19 @@
   </mat-card-header>
   <mat-card-content>
     <p>{{ building().description }}</p>
+
     <p>
       <strong>Category:</strong> {{ building().category }}
     </p>
+    <div class="public-checkbox-container">
+      @if (building().userId === authService.getCurrentUserId()) {
+        <p>Public:</p>
+        <mat-checkbox
+          [checked]="building().isItPublic"
+          (change)="onPublicChanged($event.checked)"
+        >
+        </mat-checkbox>
+      }
+    </div>
   </mat-card-content>
 </mat-card>

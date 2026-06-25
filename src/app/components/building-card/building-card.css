@@ -20,3 +20,8 @@ mat-card {
   background-color: #fff7ed;
   box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.18);
 }
+
+.public-checkbox-container {
+  display: flex;
+  align-items: center;
+}

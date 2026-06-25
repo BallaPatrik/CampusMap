@@ -5,6 +5,8 @@ import {MatCheckbox} from '@angular/material/checkbox';
 import {BuildingPolygon} from '../../model/building.polygon.model';
 import {EditBuilding} from '../../directives/edit-building';
 import {Router} from '@angular/router';
+import {BuildingService} from '../../services/building.service';
+import {AuthService} from '../../services/auth.service';
 
 @Component({
   selector: 'app-building-card',
@@ -21,8 +23,9 @@ import {Router} from '@angular/router';
 })
 export class BuildingCard {
   protected readonly router = inject(Router);
-
-  readonly building = input.required<BuildingPoint | BuildingPolygon>();
+  protected readonly buildingService = inject(BuildingService);
+  protected readonly authService = inject(AuthService);
+  protected building = input.required<BuildingPoint | BuildingPolygon>();
 
   selectAction = output<string>();
 
@@ -36,5 +39,31 @@ export class BuildingCard {
 
   protected onEdit() {
     this.router.navigateByUrl('/api/building/edit/' + this.building().id!);
+  }
+
+
+  private isPolygon(
+    building: BuildingPoint | BuildingPolygon
+  ): building is BuildingPolygon {
+    //Helper function to check if a building is a polygon or not
+    return Array.isArray(building.coordinates[0]);
+  }
+
+  onPublicChanged(isPublic: boolean) {
+
+    //Update the building's isItPublic property'
+    const updatedBuilding = {
+      ...this.building(),
+      isItPublic: isPublic
+    };
+
+    //If the building is a polygon, we use the editPolygonBuilding method
+    if (this.isPolygon(updatedBuilding)) {
+      this.buildingService.editPolygonBuilding(updatedBuilding).subscribe({});
+    }
+    //Otherwise, we use the editPointBuilding method
+    else {
+      this.buildingService.editPointBuilding(updatedBuilding).subscribe({});
+    }
   }
 }

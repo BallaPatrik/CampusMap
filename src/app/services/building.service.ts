@@ -16,8 +16,8 @@ type BuildingPointFeature = {
     name: string;
     category: string;
     description: string;
-    userId?: number;
-    isItPublic?: boolean;
+    userId: number;
+    isItPublic: boolean;
   };
   geometry: {
     type: 'Point';
@@ -32,8 +32,8 @@ type BuildingPolygonFeature = {
     name: string;
     category: string;
     description: string;
-    userId?: number;
-    isItPublic?: boolean;
+    userId: number;
+    isItPublic: boolean;
   };
   geometry: {
     type: 'Polygon';
@@ -110,7 +110,7 @@ export class BuildingService {
     return this.requestService.get<BuildingPolygonFeature[]>(BUILDING_URL).pipe(
       map(features =>
         features
-          .filter(f => f.geometry.type === 'Polygon' && (f.properties.userId === Number(userId) || f.properties.isItPublic === true))
+          .filter(f => f.geometry.type === 'Polygon' && (f.properties.userId === Number(userId) || f.properties.isItPublic))
           .map(feature => ({
             id: feature.id,
             name: feature.properties.name,
@@ -152,7 +152,7 @@ export class BuildingService {
     return this.requestService.get<BuildingPointFeature[]>(BUILDING_URL).pipe(
       map(features =>
         features
-          .filter(f => f.geometry.type === 'Point' && (f.properties.userId === Number(userId) || f.properties.isItPublic === true))
+          .filter(f => f.geometry.type === 'Point' && (f.properties.userId === Number(userId) || f.properties.isItPublic))
           .map(feature => ({
             id: feature.id,
             name: feature.properties.name,
@@ -233,7 +233,7 @@ export class BuildingService {
     );
   }
 
-  editBuilding(building: BuildingPolygon) {
+  editPolygonBuilding(building: BuildingPolygon) {
     //Construct the building feature without the id (omit)
 
     const buildingId = building.id;
@@ -250,6 +250,41 @@ export class BuildingService {
       geometry: {
         type: 'Polygon',
         coordinates: building.coordinates as Position[][]
+      }
+    };
+
+    //Send a PUT request to the server with the building feature
+    return this.requestService.put<BuildingPolygonFeature>(`${BUILDING_URL}/${buildingId}`, buildingPolygonFeature).pipe(
+      //Map because we only need parts of the response
+      map(feature => ({
+        id: feature.id,
+        name: feature.properties.name,
+        category: feature.properties.category,
+        description: feature.properties.description,
+        userId: feature.properties.userId,
+        isItPublic: feature.properties.isItPublic,
+        coordinates: feature.geometry.coordinates
+      }))
+    );
+  }
+
+  editPointBuilding(building: BuildingPoint) {
+    //Construct the building feature without the id (omit)
+
+    const buildingId = building.id;
+
+    const buildingPolygonFeature: Omit<BuildingPointFeature, 'id'> = {
+      type: 'Feature',
+      properties: {
+        name: building.name,
+        category: building.category,
+        description: building.description,
+        userId: building.userId,
+        isItPublic: building.isItPublic,
+      },
+      geometry: {
+        type: 'Point',
+        coordinates: building.coordinates as Position
       }
     };
 

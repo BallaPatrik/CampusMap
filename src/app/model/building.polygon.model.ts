@@ -6,7 +6,7 @@ export interface BuildingPolygon {
   category: string;
   description: string;
   coordinates: Position[][];
-  userId?: number;
-  isItPublic?: boolean;
+  userId: number;
+  isItPublic: boolean;
 }
 
