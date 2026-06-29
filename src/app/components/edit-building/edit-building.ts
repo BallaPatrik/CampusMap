@@ -728,7 +728,6 @@ export class EditBuilding {
       name,
       category,
       description,
-      userId,
       isItPublic
     }));
 
